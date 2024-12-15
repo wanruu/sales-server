@@ -23,67 +23,66 @@
   },
   "config": {
     "commitizen": {
-      "path": "./node_modules/cz-emoji"
+      "path": "cz-emoji"
     },
     "cz-emoji": {
-      "symbol": true,
       "skipQuestions": [
-        "scope",
-        "issues"
+        "scope"
       ],
+      "format": "{emoji} {type}{scope}: {subject}",
       "types": [
         {
           "emoji": "✨",
           "code": ":sparkles:",
-          "description": "A new feature",
+          "description": "A new feature.",
           "name": "feat"
         },
         {
           "emoji": "🐛",
           "code": ":bug:",
-          "description": "A bug fix",
+          "description": "A bug fix.",
           "name": "fix"
         },
         {
           "emoji": "📝",
           "code": ":memo:",
-          "description": "Documentation only changes",
+          "description": "Documentation only changes.",
           "name": "docs"
         },
         {
           "emoji": "🎨",
           "code": ":art:",
-          "description": "Changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc)",
+          "description": "Changes that do not affect the meaning of the code.",
           "name": "style"
         },
         {
           "emoji": "♻️",
           "code": ":recycle:",
-          "description": "A code change that neither fixes a bug nor adds a feature",
+          "description": "A code change that neither fixes a bug nor adds a feature.",
           "name": "refactor"
         },
         {
           "emoji": "⚡️",
           "code": ":zap:",
-          "description": "A code change that improves performance",
+          "description": "A code change that improves performance.",
           "name": "perf"
         },
         {
           "emoji": "🧪",
           "code": ":test_tube:",
-          "description": "Adding missing tests or correcting existing tests",
+          "description": "Adding missing tests or correcting existing tests.",
           "name": "test"
         },
         {
-          "emoji": "📦",
-          "code": ":package:",
-          "description": "Other changes that don't modify src or test files",
+          "emoji": "🧹",
+          "code": "🧹",
+          "description": "Other changes that don't modify src or test files.",
           "name": "chore"
         },
         {
           "emoji": "⏪",
           "code": ":rewind:",
-          "description": "Reverts a previous commit",
+          "description": "Reverts a previous commit.",
           "name": "revert"
         }
       ]
