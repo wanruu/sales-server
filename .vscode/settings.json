@@ -1,0 +1,13 @@
+{
+    "editor.tabSize": 4,
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": "always"
+    },
+    "prettier.configPath": ".prettierrc",
+    "cSpell.words": ["commitlint", "nestjs"],
+    "eslint.format.enable": true,
+    "eslint.validate": ["typescript", "javascript"],
+    "eslint.options": { "configFile": ".eslintrc.js" }
+}
