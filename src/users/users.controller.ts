@@ -4,15 +4,32 @@ import {
     Get,
     HttpCode,
     HttpStatus,
+    Param,
+    Patch,
     Post,
+    UnauthorizedException,
+    UseGuards,
 } from '@nestjs/common';
-import { UserService } from './users.services';
+import { UserService } from './users.service';
 import { LoginDto } from './dto/login.dto';
 import { CreateUserDto } from './dto/create-user.dto';
+import { AuthGuard } from 'src/auth/auth.guard';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { User } from 'src/decorators/user.decorator';
 
 @Controller('users')
 export class UserController {
     constructor(private userService: UserService) {}
+
+    @Get(':id')
+    @HttpCode(HttpStatus.OK)
+    @UseGuards(AuthGuard)
+    findById(@Param('id') id: string, @User() user: string) {
+        if (user !== id) {
+            throw new UnauthorizedException('Permission denied.');
+        }
+        return this.userService.findById(id);
+    }
 
     @Post('login')
     @HttpCode(HttpStatus.OK)
@@ -26,15 +43,17 @@ export class UserController {
         return this.userService.create(dto);
     }
 
-    @Get()
+    @Patch(':id')
     @HttpCode(HttpStatus.OK)
-    findAll() {
-        return this.userService.findAll();
-    }
-
-    @Get('test')
-    @HttpCode(HttpStatus.OK)
-    test() {
-        return 'hello world';
+    @UseGuards(AuthGuard)
+    update(
+        @Param('id') id: string,
+        @Body() dto: UpdateUserDto,
+        @User() user: string,
+    ) {
+        if (user !== id) {
+            throw new UnauthorizedException('Permission denied.');
+        }
+        return this.userService.update(id, dto);
     }
 }
