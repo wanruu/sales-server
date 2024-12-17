@@ -13,7 +13,7 @@ import {
 import { UserService } from './users.service';
 import { LoginDto } from './dto/login.dto';
 import { CreateUserDto } from './dto/create-user.dto';
-import { AuthGuard } from 'src/auth/auth.guard';
+import { AuthGuard } from 'src/domains/auth/auth.guard';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from 'src/decorators/user.decorator';
 

@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
-import { UserModule } from './users/users.module';
+import { UserModule } from './domains/users/users.module';
 import { JwtModule } from '@nestjs/jwt';
-import { ProductModule } from './products/products.module';
+import { ProductModule } from './domains/products/products.module';
 
 @Module({
     imports: [
