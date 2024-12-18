@@ -10,7 +10,7 @@ import {
     UseGuards,
 } from '@nestjs/common';
 import { ProductService } from './products.service';
-import { AuthGuard } from 'src/domains/auth/auth.guard';
+import { AuthGuard } from 'src/auth/auth.guard';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { User } from 'src/decorators/user.decorator';
@@ -22,28 +22,28 @@ export class ProductController {
 
     @Get()
     @HttpCode(HttpStatus.OK)
-    findAll(@User() user: string) {
+    findAll(@User() user: number) {
         return this.productService.findAll(user);
     }
 
     @Get(':id')
     @HttpCode(HttpStatus.OK)
-    findById(@Param('id') id: string, @User() user: string) {
+    findById(@Param('id') id: number, @User() user: number) {
         return this.productService.findById(id, user);
     }
 
     @Post()
     @HttpCode(HttpStatus.CREATED)
-    create(@Body() dto: CreateProductDto, @User() user: string) {
+    create(@Body() dto: CreateProductDto, @User() user: number) {
         return this.productService.create(dto, user);
     }
 
     @Patch(':id')
     @HttpCode(HttpStatus.OK)
     update(
-        @Param('id') id: string,
+        @Param('id') id: number,
         @Body() dto: UpdateProductDto,
-        @User() user: string,
+        @User() user: number,
     ) {
         return this.productService.update(id, dto, user);
     }

@@ -13,7 +13,7 @@ import {
 import { UserService } from './users.service';
 import { LoginDto } from './dto/login.dto';
 import { CreateUserDto } from './dto/create-user.dto';
-import { AuthGuard } from 'src/domains/auth/auth.guard';
+import { AuthGuard } from 'src/auth/auth.guard';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from 'src/decorators/user.decorator';
 
@@ -24,7 +24,7 @@ export class UserController {
     @Get(':id')
     @HttpCode(HttpStatus.OK)
     @UseGuards(AuthGuard)
-    findById(@Param('id') id: string, @User() user: string) {
+    findById(@Param('id') id: number, @User() user: number) {
         if (user !== id) {
             throw new UnauthorizedException('Permission denied.');
         }
@@ -47,9 +47,9 @@ export class UserController {
     @HttpCode(HttpStatus.OK)
     @UseGuards(AuthGuard)
     update(
-        @Param('id') id: string,
+        @Param('id') id: number,
         @Body() dto: UpdateUserDto,
-        @User() user: string,
+        @User() user: number,
     ) {
         if (user !== id) {
             throw new UnauthorizedException('Permission denied.');

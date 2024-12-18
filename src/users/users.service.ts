@@ -5,44 +5,43 @@ import {
     NotFoundException,
     UnauthorizedException,
 } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { isValidObjectId, Model } from 'mongoose';
-import { User } from 'src/schemas/user.schema';
+import { User } from './entity/user.entity';
 import { compareSync, genSaltSync, hashSync } from 'bcrypt';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginDto } from './dto/login.dto';
 import { JwtService } from '@nestjs/jwt';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class UserService {
     constructor(
-        @InjectModel(User.name) private userModel: Model<User>,
+        @InjectRepository(User)
+        private readonly userRepository: Repository<User>,
         private jwtService: JwtService,
     ) {}
 
-    async findById(id: string) {
-        if (!isValidObjectId(id)) {
-            throw new NotFoundException('User not found.');
-        }
-        const user = await this.userModel
-            .findById(id)
-            .select('-password')
-            .exec();
+    async findById(id: number): Promise<Partial<User>> {
+        const user = await this.userRepository.findOneBy({ id });
         if (!user) {
             throw new NotFoundException('User not found.');
         }
-        return user;
+        const { password, ...userWithoutPassword } = user;
+        return userWithoutPassword;
     }
 
-    async create(dto: CreateUserDto) {
+    async create(dto: CreateUserDto): Promise<Partial<User>> {
         try {
-            dto.password = hashSync(dto.password, genSaltSync(10));
-            const user = new this.userModel(dto);
-            const newUser = await user.save();
-            const { password, ...userWithoutPassword } = newUser.toObject();
+            const user = new User();
+            user.name = dto.name;
+            user.password = hashSync(dto.password, genSaltSync(10));
+            const savedUser = await this.userRepository.save(user);
+            const { password, ...userWithoutPassword } = savedUser;
             return userWithoutPassword;
         } catch (error) {
+            console.log(error);
+            // TODO: handle error
             if (error.code === 11000) {
                 throw new ConflictException('Username is already in use.');
             }
@@ -52,27 +51,26 @@ export class UserService {
 
     async login(dto: LoginDto): Promise<{ access_token: string }> {
         const { name, password } = dto;
-        const user = await this.userModel.findOne({ name }).exec();
+        const user = await this.userRepository.findOneBy({ name });
         if (!user || !compareSync(password, user.password)) {
             throw new UnauthorizedException('Incorrect username or password.');
         }
-        const payload = { sub: user._id, username: user.name };
+        const payload = { sub: user.id, username: user.name };
         const token = this.jwtService.sign(payload);
         return { access_token: token };
     }
 
-    async update(id: string, dto: UpdateUserDto) {
-        if (!isValidObjectId(id) || !(await this.userModel.findById(id))) {
+    async update(id: number, dto: UpdateUserDto): Promise<Partial<User>> {
+        if (!(await this.userRepository.findOneBy({ id }))) {
             throw new NotFoundException('User not found.');
         }
         try {
-            dto.password = hashSync(dto.password, genSaltSync(10));
-            const updatedUser = await this.userModel
-                .findByIdAndUpdate(id, dto, { new: true })
-                .select('-password')
-                .exec();
-            return updatedUser;
+            await this.userRepository.update(id, dto);
+            const updatedUser = await this.userRepository.findOneBy({ id });
+            const { password, ...userWithoutPassword } = updatedUser;
+            return userWithoutPassword;
         } catch (error) {
+            // TODO: handle error
             if (error.code === 11000) {
                 throw new ConflictException('Username is already in use.');
             }

@@ -22,28 +22,28 @@ export class PartnerController {
 
     @Get()
     @HttpCode(HttpStatus.OK)
-    findAll(@User() user: string) {
+    findAll(@User() user: number) {
         return this.partnerService.findAll(user);
     }
 
     @Get('/:id')
     @HttpCode(HttpStatus.OK)
-    findOne(@Param('id') id: string, @User() user: string) {
+    findOne(@Param('id') id: number, @User() user: number) {
         return this.partnerService.findById(id, user);
     }
 
     @Post()
     @HttpCode(HttpStatus.CREATED)
-    create(@Body() dto: CreatePartnerDto, @User() user: string) {
+    create(@Body() dto: CreatePartnerDto, @User() user: number) {
         return this.partnerService.create(dto, user);
     }
 
     @Patch('/:id')
     @HttpCode(HttpStatus.OK)
     update(
-        @Param('id') id: string,
+        @Param('id') id: number,
         @Body() dto: UpdatePartnerDto,
-        @User() user: string,
+        @User() user: number,
     ) {
         return this.partnerService.update(id, dto, user);
     }
