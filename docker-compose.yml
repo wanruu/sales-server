@@ -5,64 +5,57 @@ services:
             context: .
             target: development
             dockerfile: ./Dockerfile
-        command: npm run start:dev
         ports:
             - 8080:80
             - 3000:3000
         tty: true
         volumes:
             - .:/usr/src/app
-            - /usr/src/app/node_modules
+            - node_modules:/usr/src/app/node_modules
             - ssh-data:/root/.ssh
         networks:
             - server-network
         environment:
-            MONGO_DOMAIN: mongodb
-    mongodb:
-        image: mongo
-        container_name: server-mongodb
-        environment:
-            - MONGO_INITDB_ROOT_USERNAME=root
-            - MONGO_INITDB_ROOT_PASSWORD=rootpw
+            - DB_HOST=db
+    db:
+        container_name: server-db
+        image: postgres:16.6-alpine3.21
+        ports:
+            - 5432:5432
+        tty: true
         volumes:
-            - mongodb-data:/data/db
+            - db-data:/var/lib/postgresql/data
+        restart: always
         networks:
             - server-network
-        ports:
-            - 27017:27017
-        healthcheck:
-            test: echo 'db.runCommand("ping").ok' | mongo localhost:27017/sales --quiet
-            interval: 30s
-            timeout: 10s
-            retries: 3
-        restart: unless-stopped
-    mongo-express:
-        image: mongo-express
-        container_name: server-mongo-express
         environment:
-            - ME_CONFIG_MONGODB_SERVER=mongodb
-            - ME_CONFIG_MONGODB_ENABLE_ADMIN=true
-            - ME_CONFIG_MONGODB_ADMINUSERNAME=root
-            - ME_CONFIG_MONGODB_ADMINPASSWORD=rootpw
-            - ME_CONFIG_BASICAUTH_USERNAME=admin
-            - ME_CONFIG_BASICAUTH_PASSWORD=adminpw
-        depends_on:
-            - mongodb
+            - POSTGRES_DB=${DB_NAME}
+            - POSTGRES_USER=${DB_USERNAME}
+            - POSTGRES_PASSWORD=${DB_PASSWORD}
+    pgadmin4:
+        container_name: server-pgadmin
+        image: dpage/pgadmin4
+        ports:
+            - 5050:80
+        tty: true
+        volumes:
+            - pgadmin4-data:/var/lib/pgadmin
+        restart: always
         networks:
             - server-network
-        ports:
-            - 8081:8081
-        healthcheck:
-            test: wget --quiet --tries=3 --spider http://admin:adminpw@localhost:8081 || exit 1
-            interval: 30s
-            timeout: 10s
-            retries: 3
-        restart: unless-stopped
+        environment:
+            - PGADMIN_DEFAULT_EMAIL=${PGADMIN_EMAIL}
+            - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PASSWORD}
+            - PGADMIN_CONFIG_SESSION_EXPIRATION_TIME=365
+            - PGADMIN_CONFIG_MAX_SESSION_IDLE_TIME=60
+        extra_hosts:
+            - host.docker.internal:host-gateway
+
 volumes:
-    mongodb-data:
-        name: mongodb-data
     ssh-data:
-        name: ssh-data
+    node_modules:
+    db-data:
+    pgadmin4-data:
 
 networks:
     server-network:
