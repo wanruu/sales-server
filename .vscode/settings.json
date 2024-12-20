@@ -6,7 +6,7 @@
         "source.fixAll.eslint": "always"
     },
     "prettier.configPath": ".prettierrc",
-    "cSpell.words": ["commitlint", "nestjs"],
+    "cSpell.words": ["commitlint", "dpage", "nestjs", "pgadmin", "dtos"],
     "eslint.format.enable": true,
     "eslint.validate": ["typescript", "javascript"],
     "eslint.options": { "configFile": ".eslintrc.js" }

@@ -1,10 +1,11 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { MongooseModule } from '@nestjs/mongoose';
-import { UserModule } from './domains/users/users.module';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { UsersModule } from './modules/users.module';
 import { JwtModule } from '@nestjs/jwt';
-import { ProductModule } from './domains/products/products.module';
-import { PartnerModule } from './domains/partners/partners.module';
+import { ProductsModule } from './modules/products.module';
+import { PartnersModule } from './modules/partners.module';
+import { InvoiceItemsModule } from './modules/invoice-items.module';
 
 @Module({
     imports: [
@@ -14,17 +15,21 @@ import { PartnerModule } from './domains/partners/partners.module';
             secret: process.env.JWT_SECRET,
             signOptions: { expiresIn: '24h' },
         }),
-        MongooseModule.forRoot(
-            `mongodb://${process.env.MONGO_DOMAIN || 'localhost'}:27017`,
-            {
-                user: process.env.MONGO_USERNAME,
-                pass: process.env.MONGO_PASSWORD,
-                dbName: process.env.MONGO_DB_NAME || 'sales',
-            },
-        ),
-        UserModule,
-        ProductModule,
-        PartnerModule,
+        TypeOrmModule.forRoot({
+            type: 'postgres',
+            host: process.env.DB_HOST,
+            port: 5432,
+            autoLoadEntities: true,
+            password: process.env.DB_PASSWORD,
+            username: process.env.DB_USERNAME,
+            database: process.env.DB_NAME,
+            synchronize: true,
+            logging: true,
+        }),
+        UsersModule,
+        ProductsModule,
+        PartnersModule,
+        InvoiceItemsModule,
     ],
 })
 export class AppModule {}
