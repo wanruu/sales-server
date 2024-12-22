@@ -24,7 +24,7 @@ export class UsersController {
     @Get(':id')
     @HttpCode(HttpStatus.OK)
     @UseGuards(AuthGuard)
-    findById(@Param('id') id: string, @User('id') userId: string) {
+    findById(@Param('id') id: number, @User('id') userId: number) {
         if (userId !== id) {
             throw new UnauthorizedException('Permission denied.');
         }
@@ -47,9 +47,9 @@ export class UsersController {
     @HttpCode(HttpStatus.OK)
     @UseGuards(AuthGuard)
     update(
-        @Param('id') id: string,
+        @Param('id') id: number,
         @Body() dto: UpdateUserDto,
-        @User('id') userId: string,
+        @User('id') userId: number,
     ) {
         if (userId !== id) {
             throw new UnauthorizedException('Permission denied.');

@@ -23,35 +23,35 @@ export class PartnersController {
 
     @Get()
     @HttpCode(HttpStatus.OK)
-    findAll(@User('id') userId: string) {
+    findAll(@User('id') userId: number) {
         return this.partnersService.findAll(userId);
     }
 
     @Get(':id')
     @HttpCode(HttpStatus.OK)
-    findOne(@Param('id') id: string, @User('id') userId: string) {
+    findOne(@Param('id') id: number, @User('id') userId: number) {
         return this.partnersService.findById(id, userId);
     }
 
     @Post()
     @HttpCode(HttpStatus.CREATED)
-    create(@Body() dto: CreatePartnerDto, @User('id') userId: string) {
+    create(@Body() dto: CreatePartnerDto, @User('id') userId: number) {
         return this.partnersService.create(dto, userId);
     }
 
     @Patch(':id')
     @HttpCode(HttpStatus.OK)
     update(
-        @Param('id') id: string,
+        @Param('id') id: number,
         @Body() dto: UpdatePartnerDto,
-        @User('id') userId: string,
+        @User('id') userId: number,
     ) {
         return this.partnersService.update(id, dto, userId);
     }
 
     @Delete(':id')
     @HttpCode(HttpStatus.NO_CONTENT)
-    delete(@Param('id') id: string, @User('id') userId: string) {
+    delete(@Param('id') id: number, @User('id') userId: number) {
         return this.partnersService.delete(id, userId);
     }
 }

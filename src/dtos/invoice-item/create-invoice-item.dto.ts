@@ -6,13 +6,12 @@ import {
     IsOptional,
     IsString,
     IsBoolean,
-    IsUUID,
 } from 'class-validator';
 
 export class BaseCreateInvoiceItemDto {}
 export class CreateInvoiceItemDto {
-    @IsUUID()
-    productId: string;
+    @IsInt()
+    productId: number;
 
     @IsDecimal()
     @Min(0)
@@ -47,7 +46,7 @@ export class CreateInvoiceItemDto {
     @IsBoolean()
     delivered: boolean;
 
-    @IsUUID()
+    @IsInt()
     @IsOptional()
-    invoiceId?: string;
+    invoiceId?: number;
 }

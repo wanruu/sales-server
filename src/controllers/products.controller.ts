@@ -23,35 +23,35 @@ export class ProductsController {
 
     @Get()
     @HttpCode(HttpStatus.OK)
-    findAll(@User('id') userId: string) {
+    findAll(@User('id') userId: number) {
         return this.productsService.findAll(userId);
     }
 
     @Get(':id')
     @HttpCode(HttpStatus.OK)
-    findById(@Param('id') id: string, @User('id') userId: string) {
+    findById(@Param('id') id: number, @User('id') userId: number) {
         return this.productsService.findById(id, userId);
     }
 
     @Post()
     @HttpCode(HttpStatus.CREATED)
-    create(@Body() dto: CreateProductDto, @User('id') userId: string) {
+    create(@Body() dto: CreateProductDto, @User('id') userId: number) {
         return this.productsService.create(dto, userId);
     }
 
     @Patch(':id')
     @HttpCode(HttpStatus.OK)
     update(
-        @Param('id') id: string,
+        @Param('id') id: number,
         @Body() dto: UpdateProductDto,
-        @User('id') userId: string,
+        @User('id') userId: number,
     ) {
         return this.productsService.update(id, dto, userId);
     }
 
     @Delete(':id')
     @HttpCode(HttpStatus.NO_CONTENT)
-    delete(@Param('id') id: string, @User('id') userId: string) {
+    delete(@Param('id') id: number, @User('id') userId: number) {
         return this.productsService.delete(id, userId);
     }
 }

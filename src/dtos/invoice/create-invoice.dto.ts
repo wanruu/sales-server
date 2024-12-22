@@ -4,7 +4,7 @@ import {
     IsDecimal,
     IsEnum,
     IsOptional,
-    IsUUID,
+    IsInt,
     Min,
 } from 'class-validator';
 import { InvoiceType } from 'src/constants/invoice.constant';
@@ -13,8 +13,8 @@ export class CreateInvoiceDto {
     @IsEnum(InvoiceType)
     type: InvoiceType;
 
-    @IsUUID()
-    partnerId: string;
+    @IsInt()
+    partnerId: number;
 
     @IsDecimal()
     @Min(0)
@@ -35,9 +35,9 @@ export class CreateInvoiceDto {
     invoiceItems: []; // TODO: define invoice item interface
 
     @IsOptional()
-    @IsUUID()
-    orderId?: string;
+    @IsInt()
+    orderId?: number;
 
-    @IsUUID()
-    userId: string;
+    @IsInt()
+    userId: number;
 }
