@@ -4,11 +4,26 @@ import {
     InternalServerErrorException,
     NotFoundException,
 } from '@nestjs/common';
-import { CreateProductDto } from 'src/dtos/product/create-product.dto';
-import { UpdateProductDto } from 'src/dtos/product/update-product.dto';
+import {
+    CreateProductDto,
+    CreateOneProductResponseDto,
+} from 'src/dtos/product/create-product.dto';
+import {
+    UpdateProductDto,
+    UpdateOneProductResponseDto,
+} from 'src/dtos/product/update-product.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Product } from 'src/entities/product.entity';
-import { Repository } from 'typeorm';
+import {
+    type FindManyOptions,
+    type FindOneOptions,
+    type FindOptionsWhere,
+    Repository,
+} from 'typeorm';
+import {
+    FindManyProductResponseDto,
+    FindOneProductResponseDto,
+} from 'src/dtos/product/find-product.dto';
 
 @Injectable()
 export class ProductsService {
@@ -17,28 +32,32 @@ export class ProductsService {
         private productRepository: Repository<Product>,
     ) {}
 
-    async findById(id: number, userId: number): Promise<Product> {
-        const product = await this.productRepository.findOneBy({ id });
-        if (!product || product.user.id !== userId) {
+    async findOne(
+        options: FindOneOptions<Product>,
+    ): Promise<FindOneProductResponseDto> {
+        const product = await this.productRepository.findOne(options);
+        if (!product) {
             throw new NotFoundException('Product not found.');
         }
         return product;
     }
 
-    async findAll(userId: number): Promise<Product[]> {
-        const products = await this.productRepository.findBy({
-            user: { id: userId },
-        });
+    async findMany(
+        options?: FindManyOptions<Product>,
+    ): Promise<FindManyProductResponseDto[]> {
+        const products = await this.productRepository.find(options);
         return products;
     }
 
-    async create(dto: CreateProductDto, userId: number): Promise<Product> {
+    async createOne(
+        dto: CreateProductDto & { user: { id: number } },
+    ): Promise<CreateOneProductResponseDto> {
         try {
-            const product = this.productRepository.create({
-                ...dto,
-                user: { id: userId },
-            });
-            return await this.productRepository.save(product);
+            const product = this.productRepository.create(dto);
+            const savedProduct = await this.productRepository.save(product);
+            const { user, deletedAt, createdAt, updatedAt, ...rest } =
+                savedProduct;
+            return rest;
         } catch (error) {
             if (error.code === '23505') {
                 throw new ConflictException('Product already exists.');
@@ -47,17 +66,21 @@ export class ProductsService {
         }
     }
 
-    async update(
-        id: number,
+    async updateOne(
+        options: FindOneOptions<Product>,
         dto: UpdateProductDto,
-        userId: number,
-    ): Promise<Product> {
+    ): Promise<UpdateOneProductResponseDto> {
+        const oldProduct = await this.productRepository.findOne(options);
+        if (!oldProduct) {
+            throw new NotFoundException('Product not found.');
+        }
         try {
-            const oldProduct = await this.productRepository.findOneBy({ id });
-            if (!oldProduct || oldProduct.user.id !== userId) {
-                throw new NotFoundException('Product not found.');
-            }
-            return await this.productRepository.save({ ...oldProduct, ...dto });
+            const savedProduct = await this.productRepository.save({
+                ...oldProduct,
+                ...dto,
+            });
+            const { user, updatedAt, ...rest } = savedProduct;
+            return rest;
         } catch (error) {
             if (error.code === '23505') {
                 throw new ConflictException('Product already exists.');
@@ -66,11 +89,8 @@ export class ProductsService {
         }
     }
 
-    async delete(id: number, userId: number): Promise<void> {
-        const updatedResult = await this.productRepository.delete({
-            id,
-            user: { id: userId },
-        });
+    async deleteMany(criteria: FindOptionsWhere<Product>): Promise<void> {
+        const updatedResult = await this.productRepository.delete(criteria);
         if (updatedResult.affected === 0) {
             throw new NotFoundException('Product not found.');
         }

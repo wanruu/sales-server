@@ -1,32 +1,37 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import {
     Min,
     Max,
     IsInt,
-    IsDecimal,
     IsOptional,
     IsString,
     IsBoolean,
+    IsNumber,
+    IsObject,
+    ValidateNested,
 } from 'class-validator';
+import { IdDto } from '../base/id.dto';
 
-export class BaseCreateInvoiceItemDto {}
 export class CreateInvoiceItemDto {
     @ApiProperty()
-    @IsInt()
-    productId: number;
+    @IsObject()
+    @ValidateNested()
+    @Type(() => IdDto)
+    product: IdDto;
 
     @ApiProperty()
-    @IsDecimal()
+    @IsNumber()
     @Min(0)
     price: number;
 
     @ApiProperty()
-    @IsDecimal()
+    @IsNumber()
     @Min(0)
     quantity: number;
 
     @ApiProperty()
-    @IsDecimal()
+    @IsNumber()
     @Min(0)
     originalAmount: number;
 
@@ -37,12 +42,12 @@ export class CreateInvoiceItemDto {
     discount: number;
 
     @ApiProperty()
-    @IsDecimal()
+    @IsNumber()
     @Min(0)
     amount: number;
 
     @ApiPropertyOptional()
-    @IsDecimal()
+    @IsNumber()
     @Min(0)
     @IsOptional()
     weight?: number;
@@ -57,7 +62,44 @@ export class CreateInvoiceItemDto {
     delivered: boolean;
 
     @ApiPropertyOptional()
-    @IsInt()
+    @IsObject()
     @IsOptional()
-    invoiceId?: number;
+    @ValidateNested()
+    @Type(() => IdDto)
+    invoice?: IdDto;
+}
+
+export class CreateOneInvoiceItemResponseDto {
+    @ApiProperty()
+    id: number;
+
+    @ApiProperty()
+    product: IdDto;
+
+    @ApiProperty()
+    price: number;
+
+    @ApiProperty()
+    quantity: number;
+
+    @ApiProperty()
+    originalAmount: number;
+
+    @ApiProperty()
+    discount: number;
+
+    @ApiProperty()
+    amount: number;
+
+    @ApiProperty({ nullable: true })
+    weight: number | null;
+
+    @ApiProperty({ nullable: true })
+    remark: string | null;
+
+    @ApiProperty()
+    delivered: boolean;
+
+    @ApiPropertyOptional()
+    invoice?: IdDto;
 }

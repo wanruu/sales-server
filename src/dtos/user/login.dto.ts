@@ -10,3 +10,11 @@ export class LoginDto {
     @IsString()
     password: string;
 }
+
+export class LoginResponseDto {
+    @ApiProperty({ example: 1 })
+    id: number;
+
+    @ApiProperty()
+    accessToken: string;
+}

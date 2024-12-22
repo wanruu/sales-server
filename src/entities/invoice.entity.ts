@@ -10,11 +10,11 @@ import {
 import { Partner } from 'src/entities/partner.entity';
 import { User } from 'src/entities/user.entity';
 import { InvoiceItem } from 'src/entities/invoice-item.entity';
-import { BaseEntity } from 'src/entities/base.entity';
+import { BaseEntity, DecimalColumnTransformer } from 'src/entities/base.entity';
 import { InvoiceType } from 'src/constants/invoice.constant';
 
 @Entity()
-@Unique('user invoice unique', ['number', 'type', 'user'])
+@Unique('unique_invoice', ['number', 'type', 'user'])
 export class Invoice extends BaseEntity {
     @Column('varchar', { length: 12 })
     number: string;
@@ -22,13 +22,22 @@ export class Invoice extends BaseEntity {
     @Column('enum', { enum: InvoiceType })
     type: InvoiceType;
 
-    @Column('decimal', { default: 0 })
+    @Column('decimal', {
+        default: 0,
+        transformer: new DecimalColumnTransformer(),
+    })
     amount: number;
 
-    @Column('decimal', { default: 0 })
+    @Column('decimal', {
+        default: 0,
+        transformer: new DecimalColumnTransformer(),
+    })
     prepayment: number;
 
-    @Column('decimal', { default: 0 })
+    @Column('decimal', {
+        default: 0,
+        transformer: new DecimalColumnTransformer(),
+    })
     payment: number;
 
     @Column('boolean', { default: false })
@@ -38,6 +47,11 @@ export class Invoice extends BaseEntity {
         onDelete: 'CASCADE',
         cascade: true,
         nullable: false,
+    })
+    @JoinColumn({
+        name: 'partnerId',
+        referencedColumnName: 'id',
+        foreignKeyConstraintName: 'fk_invoice_partner',
     })
     partner: Partner;
 
@@ -49,7 +63,11 @@ export class Invoice extends BaseEntity {
     invoiceItems: InvoiceItem[];
 
     @OneToOne(() => Invoice, (order) => order.refund, { onDelete: 'CASCADE' })
-    @JoinColumn()
+    @JoinColumn({
+        name: 'orderId',
+        referencedColumnName: 'id',
+        foreignKeyConstraintName: 'fk_invoice_order',
+    })
     order: Invoice;
 
     @OneToOne(() => Invoice, (refund) => refund.order, { nullable: true })
@@ -58,6 +76,11 @@ export class Invoice extends BaseEntity {
     @ManyToOne(() => User, (user) => user.invoices, {
         onDelete: 'CASCADE',
         nullable: false,
+    })
+    @JoinColumn({
+        name: 'userId',
+        referencedColumnName: 'id',
+        foreignKeyConstraintName: 'fk_invoice_user',
     })
     user: User;
 }

@@ -29,3 +29,20 @@ export class CreatePartnerDto {
     @IsOptional()
     folder?: string;
 }
+
+export class CreateOnePartnerResponseDto {
+    @ApiProperty()
+    id: number;
+
+    @ApiProperty()
+    name: string;
+
+    @ApiProperty({ nullable: true })
+    phone: string | null;
+
+    @ApiProperty({ nullable: true })
+    address: string | null;
+
+    @ApiProperty({ nullable: true })
+    folder: string | null;
+}

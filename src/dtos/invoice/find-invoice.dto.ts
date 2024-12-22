@@ -1,56 +1,34 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
-import {
-    IsBoolean,
-    IsNumber,
-    IsEnum,
-    IsOptional,
-    Min,
-    IsObject,
-    ValidateNested,
-} from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 import { InvoiceType } from 'src/constants/invoice.constant';
 import { IdDto } from '../base/id.dto';
 
-export class CreateInvoiceDto {
+export class FindOneInvoiceResponseDto {
+    @ApiProperty()
+    id: number;
+
     @ApiProperty({ enum: InvoiceType })
-    @IsEnum(InvoiceType)
     type: InvoiceType;
 
     @ApiProperty()
-    @IsObject()
-    @ValidateNested()
-    @Type(() => IdDto)
     partner: IdDto;
 
     @ApiProperty()
-    @IsNumber()
-    @Min(0)
     amount: number;
 
     @ApiProperty()
-    @IsNumber()
-    @Min(0)
     prepayment: number;
 
     @ApiProperty()
-    @IsNumber()
-    @Min(0)
     payment: number;
 
     @ApiProperty()
-    @IsBoolean()
     delivered: boolean;
 
-    @ApiPropertyOptional()
-    @IsOptional()
-    @IsObject()
-    @ValidateNested()
-    @Type(() => IdDto)
-    order?: IdDto;
+    @ApiProperty({ nullable: true })
+    order: IdDto | null;
 }
 
-export class CreateOneInvoiceResponseDto {
+export class FindManyInvoiceResponseDto {
     @ApiProperty()
     id: number;
 

@@ -1,4 +1,8 @@
 import { PartialType } from '@nestjs/swagger';
-import { CreatePartnerDto } from './create-partner.dto';
+import {
+    CreatePartnerDto,
+    CreateOnePartnerResponseDto,
+} from './create-partner.dto';
 
 export class UpdatePartnerDto extends PartialType(CreatePartnerDto) {}
+export class UpdateOnePartnerResponseDto extends CreateOnePartnerResponseDto {}

@@ -5,6 +5,7 @@ import {
     HttpCode,
     HttpStatus,
     Param,
+    ParseIntPipe,
     Patch,
     Post,
     UseGuards,
@@ -14,9 +15,13 @@ import { AuthGuard } from 'src/guards/auth.guard';
 import { UpdateInvoiceItemDto } from 'src/dtos/invoice-item/update-invoice-item.dto';
 import { InvoiceItemsService } from 'src/services/invoice-items.service';
 import { User } from 'src/decorators/user.decorator';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiTags } from '@nestjs/swagger';
+import {
+    CreateOneInvoiceItemApiResponses,
+    DeleteOneInvoiceItemApiResponses,
+    UpdateOneInvoiceItemApiResponses,
+} from 'src/decorators/api-response/invoice-item.api-response.decorator';
 
-@ApiBearerAuth()
 @ApiTags('InvoiceItems')
 @Controller('invoiceItems')
 @UseGuards(AuthGuard)
@@ -24,19 +29,34 @@ export class InvoiceItemsController {
     constructor(private invoiceItemsService: InvoiceItemsService) {}
     @Post()
     @HttpCode(HttpStatus.CREATED)
-    create(@Body() dto: CreateInvoiceItemDto) {
-        return this.invoiceItemsService.create(dto);
+    @CreateOneInvoiceItemApiResponses()
+    createOne(@Body() dto: CreateInvoiceItemDto, @User('id') userId: number) {
+        return this.invoiceItemsService.createOne({
+            ...dto,
+            user: { id: userId },
+        });
     }
 
     @Patch(':id')
     @HttpCode(HttpStatus.OK)
-    update(@Param('id') id: number, @Body() dto: UpdateInvoiceItemDto) {
-        return this.invoiceItemsService.update(id, dto);
+    @UpdateOneInvoiceItemApiResponses()
+    updateById(
+        @Param('id', new ParseIntPipe()) id: number,
+        @Body() dto: UpdateInvoiceItemDto,
+    ) {
+        return this.invoiceItemsService.updateOne({ where: { id } }, dto);
     }
 
     @Delete(':id')
     @HttpCode(HttpStatus.NO_CONTENT)
-    delete(@Param('id') id: number, @User('id') userId: number) {
-        return this.invoiceItemsService.delete(id, userId);
+    @DeleteOneInvoiceItemApiResponses()
+    deleteById(
+        @Param('id', new ParseIntPipe()) id: number,
+        @User('id') userId: number,
+    ) {
+        return this.invoiceItemsService.deleteMany({
+            id,
+            user: { id: userId },
+        });
     }
 }

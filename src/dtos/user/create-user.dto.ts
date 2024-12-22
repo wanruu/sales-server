@@ -23,3 +23,11 @@ export class CreateUserDto {
     @IsString()
     password: string;
 }
+
+export class CreateOneUserResponseDto {
+    @ApiProperty({ example: 1 })
+    id: number;
+
+    @ApiProperty({ example: 'Hermione' })
+    name: string;
+}
