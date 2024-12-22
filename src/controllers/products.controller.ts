@@ -15,7 +15,10 @@ import { AuthGuard } from 'src/guards/auth.guard';
 import { CreateProductDto } from 'src/dtos/product/create-product.dto';
 import { UpdateProductDto } from 'src/dtos/product/update-product.dto';
 import { User } from 'src/decorators/user.decorator';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
+@ApiBearerAuth()
+@ApiTags('Products')
 @Controller('products')
 @UseGuards(AuthGuard)
 export class ProductsController {
