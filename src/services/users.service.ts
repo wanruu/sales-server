@@ -22,7 +22,7 @@ export class UsersService {
         private jwtService: JwtService,
     ) {}
 
-    async findById(id: string): Promise<Partial<User>> {
+    async findById(id: number): Promise<Partial<User>> {
         const user = await this.userRepository.findOneBy({ id });
         if (!user) {
             throw new NotFoundException('User not found.');
@@ -61,7 +61,7 @@ export class UsersService {
         return { access_token: token };
     }
 
-    async update(id: string, dto: UpdateUserDto): Promise<Partial<User>> {
+    async update(id: number, dto: UpdateUserDto): Promise<Partial<User>> {
         try {
             const oldUser = await this.userRepository.findOneBy({ id });
             if (!oldUser) {

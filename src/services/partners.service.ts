@@ -17,7 +17,7 @@ export class PartnersService {
         private partnerRepository: Repository<Partner>,
     ) {}
 
-    async findById(id: string, userId: string): Promise<Partner> {
+    async findById(id: number, userId: number): Promise<Partner> {
         const partner = await this.partnerRepository.findOneBy({ id });
         if (!partner || partner.user.id !== userId) {
             throw new NotFoundException('Partner not found.');
@@ -25,14 +25,14 @@ export class PartnersService {
         return partner;
     }
 
-    async findAll(userId: string): Promise<Partner[]> {
+    async findAll(userId: number): Promise<Partner[]> {
         const partners = await this.partnerRepository.findBy({
             user: { id: userId },
         });
         return partners;
     }
 
-    async create(dto: CreatePartnerDto, userId: string): Promise<Partner> {
+    async create(dto: CreatePartnerDto, userId: number): Promise<Partner> {
         try {
             const partner = this.partnerRepository.create({
                 ...dto,
@@ -48,9 +48,9 @@ export class PartnersService {
     }
 
     async update(
-        id: string,
+        id: number,
         dto: UpdatePartnerDto,
-        userId: string,
+        userId: number,
     ): Promise<Partner> {
         try {
             const oldPartner = await this.partnerRepository.findOneBy({ id });
@@ -66,7 +66,7 @@ export class PartnersService {
         }
     }
 
-    async delete(id: string, userId: string): Promise<void> {
+    async delete(id: number, userId: number): Promise<void> {
         const updateResult = await this.partnerRepository.delete({
             id,
             user: { id: userId },

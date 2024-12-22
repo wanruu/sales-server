@@ -27,13 +27,13 @@ export class InvoiceItemsController {
 
     @Patch(':id')
     @HttpCode(HttpStatus.OK)
-    update(@Param('id') id: string, @Body() dto: UpdateInvoiceItemDto) {
+    update(@Param('id') id: number, @Body() dto: UpdateInvoiceItemDto) {
         return this.invoiceItemsService.update(id, dto);
     }
 
     @Delete(':id')
     @HttpCode(HttpStatus.NO_CONTENT)
-    delete(@Param('id') id: string, @User('id') userId: string) {
+    delete(@Param('id') id: number, @User('id') userId: number) {
         return this.invoiceItemsService.delete(id, userId);
     }
 }

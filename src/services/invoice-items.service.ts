@@ -16,7 +16,7 @@ export class InvoiceItemsService {
         return await this.invoiceItemRepository.save(dto);
     }
 
-    async update(id: string, dto: UpdateInvoiceItemDto): Promise<InvoiceItem> {
+    async update(id: number, dto: UpdateInvoiceItemDto): Promise<InvoiceItem> {
         const oldInvoiceItem = await this.invoiceItemRepository.findOneBy({
             id,
         });
@@ -29,7 +29,7 @@ export class InvoiceItemsService {
         });
     }
 
-    async delete(id: string, userId: string): Promise<void> {
+    async delete(id: number, userId: number): Promise<void> {
         const updateResult = await this.invoiceItemRepository.delete({
             id,
             user: { id: userId },
