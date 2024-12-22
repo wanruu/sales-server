@@ -15,7 +15,10 @@ import { PartnersService } from 'src/services/partners.service';
 import { User } from 'src/decorators/user.decorator';
 import { CreatePartnerDto } from 'src/dtos/partner/create-partner.dto';
 import { UpdatePartnerDto } from 'src/dtos/partner/update-partner.dto';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
+@ApiBearerAuth()
+@ApiTags('Partners')
 @Controller('partners')
 @UseGuards(AuthGuard)
 export class PartnersController {

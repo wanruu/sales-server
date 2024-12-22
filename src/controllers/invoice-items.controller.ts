@@ -14,7 +14,10 @@ import { AuthGuard } from 'src/guards/auth.guard';
 import { UpdateInvoiceItemDto } from 'src/dtos/invoice-item/update-invoice-item.dto';
 import { InvoiceItemsService } from 'src/services/invoice-items.service';
 import { User } from 'src/decorators/user.decorator';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
+@ApiBearerAuth()
+@ApiTags('InvoiceItems')
 @Controller('invoiceItems')
 @UseGuards(AuthGuard)
 export class InvoiceItemsController {
