@@ -1,14 +1,15 @@
-import {
-    ConflictException,
-    Injectable,
-    InternalServerErrorException,
-    NotFoundException,
-} from '@nestjs/common';
-import { CreatePartnerDto } from 'src/dtos/partner/create-partner.dto';
-import { UpdatePartnerDto } from 'src/dtos/partner/update-partner.dto';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { CreatePartnerDto } from 'src/dtos/request/partner/create-partner.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Partner } from 'src/entities/partner.entity';
-import { Repository } from 'typeorm';
+import {
+    type FindManyOptions,
+    type FindOneOptions,
+    type FindOptionsWhere,
+    Repository,
+} from 'typeorm';
+import { BasePartnerDto } from 'src/dtos/common/base-partner.dto';
+import { UpdatePartnerDto } from 'src/dtos/request/partner/update-partner.dto';
 
 @Injectable()
 export class PartnersService {
@@ -17,61 +18,46 @@ export class PartnersService {
         private partnerRepository: Repository<Partner>,
     ) {}
 
-    async findById(id: number, userId: number): Promise<Partner> {
-        const partner = await this.partnerRepository.findOneBy({ id });
-        if (!partner || partner.user.id !== userId) {
+    async findOne(options: FindOneOptions<Partner>): Promise<Partner> {
+        const partner = await this.partnerRepository.findOne(options);
+        if (!partner) {
             throw new NotFoundException('Partner not found.');
         }
         return partner;
     }
 
-    async findAll(userId: number): Promise<Partner[]> {
-        const partners = await this.partnerRepository.findBy({
-            user: { id: userId },
-        });
-        return partners;
+    findMany(options?: FindManyOptions<Partner>): Promise<Partner[]> {
+        return this.partnerRepository.find(options);
     }
 
-    async create(dto: CreatePartnerDto, userId: number): Promise<Partner> {
-        try {
-            const partner = this.partnerRepository.create({
-                ...dto,
-                user: { id: userId },
-            });
-            return await this.partnerRepository.save(partner);
-        } catch (error) {
-            if (error.code === '23505') {
-                throw new ConflictException('Partner already exists');
-            }
-            throw new InternalServerErrorException();
-        }
+    async createOne(
+        dto: CreatePartnerDto & { user: { id: number } },
+    ): Promise<BasePartnerDto> {
+        const partner = this.partnerRepository.create(dto);
+        const savedPartner = await this.partnerRepository.save(partner);
+        const { user, deletedAt, createdAt, updatedAt, ...rest } = savedPartner;
+        return rest;
     }
 
-    async update(
-        id: number,
+    async updateOne(
+        options: FindOneOptions<Partner>,
         dto: UpdatePartnerDto,
-        userId: number,
-    ): Promise<Partner> {
-        try {
-            const oldPartner = await this.partnerRepository.findOneBy({ id });
-            if (!oldPartner || oldPartner.user.id !== userId) {
-                throw new NotFoundException('Partner not found.');
-            }
-            return await this.partnerRepository.save({ ...oldPartner, ...dto });
-        } catch (error) {
-            if (error.code === '23505') {
-                throw new ConflictException('Partner already exists.');
-            }
-            throw new InternalServerErrorException();
+    ): Promise<BasePartnerDto> {
+        const oldPartner = await this.partnerRepository.findOne(options);
+        if (!oldPartner) {
+            throw new NotFoundException('Partner not found.');
         }
+        const savedPartner = await this.partnerRepository.save({
+            ...oldPartner,
+            ...dto,
+        });
+        const { user, updatedAt, ...rest } = savedPartner;
+        return rest;
     }
 
-    async delete(id: number, userId: number): Promise<void> {
-        const updateResult = await this.partnerRepository.delete({
-            id,
-            user: { id: userId },
-        });
-        if (updateResult.affected === 0) {
+    async deleteMany(criteria: FindOptionsWhere<Partner>): Promise<void> {
+        const deleteResult = await this.partnerRepository.delete(criteria);
+        if (deleteResult.affected === 0) {
             throw new NotFoundException('Partner not found.');
         }
     }

@@ -1,43 +1,44 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import {
-    IsDecimal,
     IsNotEmpty,
+    IsNumber,
     IsOptional,
     IsString,
     MaxLength,
 } from 'class-validator';
 
 export class CreateProductDto {
-    @ApiPropertyOptional()
+    @ApiPropertyOptional({ example: 'material#1' })
     @Transform((params) => params.value?.toString()?.trim())
-    @IsOptional()
     @IsString()
     @MaxLength(30)
+    @IsOptional()
     material?: string;
 
-    @ApiProperty()
+    @ApiProperty({ example: 'name#1' })
     @Transform((params) => params.value?.toString()?.trim())
     @IsString()
     @MaxLength(40)
     @IsNotEmpty()
     name: string;
 
-    @ApiProperty()
+    @ApiProperty({ example: 'spec#1' })
     @Transform((params) => params.value?.toString()?.trim())
     @IsString()
     @MaxLength(30)
     @IsNotEmpty()
     spec: string;
 
-    @ApiProperty()
+    @ApiProperty({ example: 'unit#1' })
     @Transform((params) => params.value?.toString()?.trim())
     @IsString()
     @MaxLength(10)
     @IsNotEmpty()
     unit: string;
 
-    @ApiPropertyOptional()
-    @IsDecimal()
+    @ApiPropertyOptional({ example: 10 })
+    @IsNumber()
+    @IsOptional()
     quantity?: number;
 }

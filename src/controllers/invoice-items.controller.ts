@@ -2,41 +2,78 @@ import {
     Body,
     Controller,
     Delete,
+    Get,
     HttpCode,
     HttpStatus,
     Param,
+    ParseIntPipe,
     Patch,
     Post,
     UseGuards,
 } from '@nestjs/common';
-import { CreateInvoiceItemDto } from 'src/dtos/invoice-item/create-invoice-item.dto';
 import { AuthGuard } from 'src/guards/auth.guard';
-import { UpdateInvoiceItemDto } from 'src/dtos/invoice-item/update-invoice-item.dto';
 import { InvoiceItemsService } from 'src/services/invoice-items.service';
 import { User } from 'src/decorators/user.decorator';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiTags } from '@nestjs/swagger';
+import {
+    CreateOneInvoiceItemApiResponses,
+    DeleteOneInvoiceItemApiResponses,
+    FindManyInvoiceItemApiResponses,
+    UpdateOneInvoiceItemApiResponses,
+} from 'src/decorators/api-response/invoice-item.api-response.decorator';
+import { FindManyInvoiceItemDto } from 'src/dtos/response/invoice-item/find-many-invoice-item.response.dto';
+import { CreateInvoiceItemDto } from 'src/dtos/request/invoice-item/create-invoice-item.dto';
+import { UpdateInvoiceItemDto } from 'src/dtos/request/invoice-item/update-invoice-item.dto';
 
-@ApiBearerAuth()
 @ApiTags('InvoiceItems')
 @Controller('invoiceItems')
 @UseGuards(AuthGuard)
 export class InvoiceItemsController {
     constructor(private invoiceItemsService: InvoiceItemsService) {}
+
+    @Get()
+    @HttpCode(HttpStatus.OK)
+    @FindManyInvoiceItemApiResponses()
+    findAll(@User('id') userId: number): Promise<FindManyInvoiceItemDto[]> {
+        return this.invoiceItemsService.findMany({
+            where: { user: { id: userId } },
+            loadRelationIds: {
+                relations: ['product', 'invoice', 'orderItem'],
+                disableMixedMap: true,
+            },
+        });
+    }
+
     @Post()
     @HttpCode(HttpStatus.CREATED)
-    create(@Body() dto: CreateInvoiceItemDto) {
-        return this.invoiceItemsService.create(dto);
+    @CreateOneInvoiceItemApiResponses()
+    createOne(@Body() dto: CreateInvoiceItemDto, @User('id') userId: number) {
+        return this.invoiceItemsService.createOne({
+            ...dto,
+            user: { id: userId },
+        });
     }
 
     @Patch(':id')
     @HttpCode(HttpStatus.OK)
-    update(@Param('id') id: number, @Body() dto: UpdateInvoiceItemDto) {
-        return this.invoiceItemsService.update(id, dto);
+    @UpdateOneInvoiceItemApiResponses()
+    updateById(
+        @Param('id', new ParseIntPipe()) id: number,
+        @Body() dto: UpdateInvoiceItemDto,
+    ) {
+        return this.invoiceItemsService.updateOne({ where: { id } }, dto);
     }
 
     @Delete(':id')
     @HttpCode(HttpStatus.NO_CONTENT)
-    delete(@Param('id') id: number, @User('id') userId: number) {
-        return this.invoiceItemsService.delete(id, userId);
+    @DeleteOneInvoiceItemApiResponses()
+    deleteById(
+        @Param('id', new ParseIntPipe()) id: number,
+        @User('id') userId: number,
+    ) {
+        return this.invoiceItemsService.deleteMany({
+            id,
+            user: { id: userId },
+        });
     }
 }

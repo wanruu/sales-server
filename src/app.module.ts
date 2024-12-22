@@ -6,6 +6,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { ProductsModule } from './modules/products.module';
 import { PartnersModule } from './modules/partners.module';
 import { InvoiceItemsModule } from './modules/invoice-items.module';
+import { InvoiceModule } from './modules/invoice.module';
 
 @Module({
     imports: [
@@ -24,12 +25,13 @@ import { InvoiceItemsModule } from './modules/invoice-items.module';
             username: process.env.DB_USERNAME,
             database: process.env.DB_NAME,
             synchronize: true,
-            logging: true,
+            // logging: true,
         }),
         UsersModule,
         ProductsModule,
         PartnersModule,
         InvoiceItemsModule,
+        InvoiceModule,
     ],
 })
 export class AppModule {}

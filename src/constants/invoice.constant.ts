@@ -1,6 +1,12 @@
 export enum InvoiceType {
-    salesOrder,
-    purchaseOrder,
-    salesRefund,
-    purchaseRefund,
+    SalesOrder,
+    PurchaseOrder,
+    SalesRefund,
+    PurchaseRefund,
+}
+
+export enum DeliveryStatus {
+    NotDelivered,
+    Delivered,
+    PartiallyDelivered,
 }

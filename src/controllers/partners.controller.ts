@@ -6,6 +6,7 @@ import {
     HttpCode,
     HttpStatus,
     Param,
+    ParseIntPipe,
     Patch,
     Post,
     UseGuards,
@@ -13,11 +14,20 @@ import {
 import { AuthGuard } from 'src/guards/auth.guard';
 import { PartnersService } from 'src/services/partners.service';
 import { User } from 'src/decorators/user.decorator';
-import { CreatePartnerDto } from 'src/dtos/partner/create-partner.dto';
-import { UpdatePartnerDto } from 'src/dtos/partner/update-partner.dto';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { CreatePartnerDto } from 'src/dtos/request/partner/create-partner.dto';
+import { ApiTags } from '@nestjs/swagger';
+import {
+    CreateOnePartnerApiResponses,
+    DeleteOnePartnerApiResponses,
+    FindManyPartnerApiResponses,
+    FindOnePartnerApiResponses,
+    UpdateOnePartnerApiResponses,
+} from 'src/decorators/api-response/partner.api-response.decorator';
+import { BasePartnerDto } from 'src/dtos/common/base-partner.dto';
+import { FindOnePartnerResponseDto } from 'src/dtos/response/partner/find-one-partner.response.dto';
+import { UpdatePartnerDto } from 'src/dtos/request/partner/update-partner.dto';
+import { FindManyPartnerResponseDto } from 'src/dtos/response/partner/find-many-partner.response.dto';
 
-@ApiBearerAuth()
 @ApiTags('Partners')
 @Controller('partners')
 @UseGuards(AuthGuard)
@@ -26,35 +36,56 @@ export class PartnersController {
 
     @Get()
     @HttpCode(HttpStatus.OK)
-    findAll(@User('id') userId: number) {
-        return this.partnersService.findAll(userId);
+    @FindManyPartnerApiResponses()
+    findAll(@User('id') userId: number): Promise<FindManyPartnerResponseDto[]> {
+        return this.partnersService.findMany({
+            where: { user: { id: userId } },
+        });
     }
 
     @Get(':id')
     @HttpCode(HttpStatus.OK)
-    findOne(@Param('id') id: number, @User('id') userId: number) {
-        return this.partnersService.findById(id, userId);
+    @FindOnePartnerApiResponses()
+    findById(
+        @Param('id', new ParseIntPipe()) id: number,
+        @User('id') userId: number,
+    ): Promise<FindOnePartnerResponseDto> {
+        return this.partnersService.findOne({
+            where: { id, user: { id: userId } },
+        });
     }
 
     @Post()
     @HttpCode(HttpStatus.CREATED)
-    create(@Body() dto: CreatePartnerDto, @User('id') userId: number) {
-        return this.partnersService.create(dto, userId);
+    @CreateOnePartnerApiResponses()
+    createOne(
+        @Body() dto: CreatePartnerDto,
+        @User('id') userId: number,
+    ): Promise<BasePartnerDto> {
+        return this.partnersService.createOne({ ...dto, user: { id: userId } });
     }
 
     @Patch(':id')
     @HttpCode(HttpStatus.OK)
-    update(
-        @Param('id') id: number,
+    @UpdateOnePartnerApiResponses()
+    updateById(
+        @Param('id', new ParseIntPipe()) id: number,
         @Body() dto: UpdatePartnerDto,
         @User('id') userId: number,
-    ) {
-        return this.partnersService.update(id, dto, userId);
+    ): Promise<BasePartnerDto> {
+        return this.partnersService.updateOne(
+            { where: { id, user: { id: userId } } },
+            dto,
+        );
     }
 
     @Delete(':id')
     @HttpCode(HttpStatus.NO_CONTENT)
-    delete(@Param('id') id: number, @User('id') userId: number) {
-        return this.partnersService.delete(id, userId);
+    @DeleteOnePartnerApiResponses()
+    deleteById(
+        @Param('id', new ParseIntPipe()) id: number,
+        @User('id') userId: number,
+    ): Promise<void> {
+        return this.partnersService.deleteMany({ id, user: { id: userId } });
     }
 }
