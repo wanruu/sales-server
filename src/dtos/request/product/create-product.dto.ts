@@ -10,28 +10,36 @@ import {
 
 export class CreateProductDto {
     @ApiPropertyOptional({ example: 'material#1' })
-    @Transform((params) => params.value?.toString()?.trim())
+    @Transform((params) => params.value?.toString()?.trim(), {
+        toClassOnly: true,
+    })
     @IsString()
     @MaxLength(30)
     @IsOptional()
     material?: string;
 
     @ApiProperty({ example: 'name#1' })
-    @Transform((params) => params.value?.toString()?.trim())
+    @Transform((params) => params.value?.toString()?.trim(), {
+        toClassOnly: true,
+    })
     @IsString()
     @MaxLength(40)
     @IsNotEmpty()
     name: string;
 
     @ApiProperty({ example: 'spec#1' })
-    @Transform((params) => params.value?.toString()?.trim())
+    @Transform((params) => params.value?.toString()?.trim(), {
+        toClassOnly: true,
+    })
     @IsString()
     @MaxLength(30)
     @IsNotEmpty()
     spec: string;
 
     @ApiProperty({ example: 'unit#1' })
-    @Transform((params) => params.value?.toString()?.trim())
+    @Transform((params) => params.value?.toString()?.trim(), {
+        toClassOnly: true,
+    })
     @IsString()
     @MaxLength(10)
     @IsNotEmpty()

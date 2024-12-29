@@ -1,5 +1,4 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Transform } from 'class-transformer';
 import { IsInt, ValidateIf } from 'class-validator';
 
 export class IdDto {
@@ -13,10 +12,4 @@ export class NullableIdDto {
     @IsInt()
     @ValidateIf((_, value) => value !== null)
     id: number | null;
-}
-
-export class NullIdDto {
-    @ApiProperty({ nullable: true })
-    @Transform(() => null)
-    id: null;
 }

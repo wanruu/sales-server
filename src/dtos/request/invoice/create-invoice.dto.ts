@@ -1,5 +1,4 @@
 import {
-    ApiExtraModels,
     ApiProperty,
     ApiPropertyOptional,
     getSchemaPath,
@@ -8,15 +7,19 @@ import { Type } from 'class-transformer';
 import {
     IsNumber,
     IsEnum,
-    IsOptional,
     Min,
     IsObject,
     ValidateNested,
     IsArray,
     IsDateString,
+    IsOptional,
 } from 'class-validator';
-import { DeliveryStatus, InvoiceType } from 'src/constants/invoice.constant';
-import { IdDto, NullIdDto } from 'src/dtos/common/id.dto';
+import {
+    DeliveryStatus,
+    InvoiceType,
+    isRefund,
+} from 'src/constants/invoice.constant';
+import { IdDto, NullableIdDto } from 'src/dtos/common/id.dto';
 import { CreatePartnerDto } from '../partner/create-partner.dto';
 import {
     CreateOrderItemDto,
@@ -37,7 +40,11 @@ export class CreateInvoiceDto {
     })
     @IsObject()
     @ValidateNested()
-    @Type((options) => (options.object.partner?.id ? IdDto : CreatePartnerDto))
+    @Type((options) =>
+        isRefund(options.object.type) || options.object.partner?.id
+            ? IdDto
+            : CreatePartnerDto,
+    )
     partner: IdDto | CreatePartnerDto;
 
     @ApiProperty({ type: Date })
@@ -54,9 +61,7 @@ export class CreateInvoiceDto {
     @IsArray()
     @ValidateNested({ each: true })
     @Type((options) =>
-        [InvoiceType.SalesRefund, InvoiceType.PurchaseRefund].includes(
-            options.object.type,
-        )
+        isRefund(options.object.type)
             ? CreateRefundItemDto
             : CreateOrderItemDto,
     )
@@ -81,23 +86,14 @@ export class CreateInvoiceDto {
     @IsEnum(DeliveryStatus)
     delivered: DeliveryStatus;
 
-    @ApiExtraModels(NullIdDto)
     @ApiPropertyOptional({
-        oneOf: [
-            { $ref: getSchemaPath(IdDto) },
-            { $ref: getSchemaPath(NullIdDto) },
-        ],
+        type: NullableIdDto,
         examples: [{ id: 1 }, { id: null }],
     })
     @IsOptional()
     @IsObject()
     @ValidateNested()
-    @Type((options) =>
-        [InvoiceType.SalesRefund, InvoiceType.PurchaseRefund].includes(
-            options.object.type,
-        )
-            ? IdDto
-            : NullIdDto,
-    )
-    order?: NullIdDto | IdDto;
+    @Type(() => NullableIdDto)
+    // TODO: order or refund
+    order?: NullableIdDto;
 }

@@ -1,5 +1,4 @@
 import {
-    ApiExtraModels,
     ApiProperty,
     ApiPropertyOptional,
     getSchemaPath,
@@ -14,8 +13,12 @@ import {
     ValidateNested,
     IsArray,
 } from 'class-validator';
-import { DeliveryStatus, InvoiceType } from 'src/constants/invoice.constant';
-import { IdDto, NullIdDto } from 'src/dtos/common/id.dto';
+import {
+    DeliveryStatus,
+    InvoiceType,
+    isOrder,
+} from 'src/constants/invoice.constant';
+import { IdDto, NullableIdDto } from 'src/dtos/common/id.dto';
 import { CreatePartnerDto } from '../partner/create-partner.dto';
 import {
     ReplaceOrderItemDto,
@@ -49,9 +52,7 @@ export class ReplaceInvoiceDto {
     @IsArray()
     @ValidateNested({ each: true })
     @Type((options) =>
-        [InvoiceType.SalesOrder, InvoiceType.PurchaseOrder].includes(
-            options.object.type,
-        )
+        isOrder(options.object.type)
             ? ReplaceOrderItemDto
             : ReplaceRefundItemDto,
     )
@@ -76,23 +77,13 @@ export class ReplaceInvoiceDto {
     @IsEnum(DeliveryStatus)
     delivered: DeliveryStatus;
 
-    @ApiExtraModels(NullIdDto)
     @ApiPropertyOptional({
-        oneOf: [
-            { $ref: getSchemaPath(IdDto) },
-            { $ref: getSchemaPath(NullIdDto) },
-        ],
+        type: NullableIdDto,
         examples: [{ id: 1 }, { id: null }],
     })
     @IsOptional()
     @IsObject()
     @ValidateNested()
-    @Type((options) =>
-        [InvoiceType.SalesRefund, InvoiceType.PurchaseRefund].includes(
-            options.object.type,
-        )
-            ? IdDto
-            : NullIdDto,
-    )
-    order?: NullIdDto | IdDto;
+    @Type(() => NullableIdDto)
+    order?: NullableIdDto;
 }

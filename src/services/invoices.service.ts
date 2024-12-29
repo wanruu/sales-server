@@ -44,7 +44,11 @@ export class InvoicesService {
         }));
 
         // get next number
-        const number = await this.getNextNumber(dto.type, new Date(dto.date));
+        const number = await this.getNextNumber(
+            dto.user.id,
+            dto.type,
+            new Date(dto.date),
+        );
 
         // create invoice
         const invoice = this.invoiceRepository.create({
@@ -133,6 +137,7 @@ export class InvoicesService {
     }
 
     private async getNextNumber(
+        userId: number,
         type: InvoiceType,
         date: Date,
     ): Promise<string> {
@@ -145,10 +150,8 @@ export class InvoicesService {
         // get suffix
         const maxRecord = await this.invoiceRepository
             .createQueryBuilder()
-            .where('type = :type AND number LIKE :pattern', {
-                type,
-                pattern: `${prefix}%`,
-            })
+            .where({ user: { id: userId }, type })
+            .andWhere('number LIKE :pattern', { pattern: `${prefix}%` })
             .select('MAX(number)', 'maxNumber')
             .getRawOne();
         const nextNumber = parseInt(maxRecord?.maxNumber?.slice(9) || 0) + 1;
