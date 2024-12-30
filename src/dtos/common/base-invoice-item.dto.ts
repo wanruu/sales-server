@@ -1,6 +1,4 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IdDto, NullableIdDto } from './id.dto';
-
 export class BaseInvoiceItemDto {
     @ApiProperty()
     id: number;
@@ -28,15 +26,4 @@ export class BaseInvoiceItemDto {
 
     @ApiProperty()
     delivered: boolean;
-}
-
-export class BaseInvoiceItemWithRelationsDto extends BaseInvoiceItemDto {
-    @ApiProperty({ type: IdDto })
-    product: IdDto;
-
-    @ApiProperty({ type: NullableIdDto })
-    invoice: NullableIdDto;
-
-    @ApiProperty({ type: NullableIdDto })
-    orderItem: NullableIdDto;
 }

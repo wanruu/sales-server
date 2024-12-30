@@ -1,4 +1,4 @@
-import { ApiExtraModels, ApiProperty } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 import { BaseInvoiceItemDto } from 'src/dtos/common/base-invoice-item.dto';
 import { BaseInvoiceDto } from 'src/dtos/common/base-invoice.dto';
 import { BasePartnerDto } from 'src/dtos/common/base-partner.dto';
@@ -14,7 +14,6 @@ class _FindOneInvoiceResponseInvoiceItemDto extends BaseInvoiceItemDto {
 }
 
 export class FindOneInvoiceResponseDto extends BaseInvoiceDto {
-    @ApiExtraModels(BaseInvoiceItemDto)
     @ApiProperty({
         isArray: true,
         type: _FindOneInvoiceResponseInvoiceItemDto,

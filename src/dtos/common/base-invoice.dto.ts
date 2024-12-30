@@ -1,6 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { DeliveryStatus, InvoiceType } from 'src/constants/invoice.constant';
-import { IdDto, NullableIdDto } from './id.dto';
 
 export class BaseInvoiceDto {
     @ApiProperty()
@@ -23,12 +22,4 @@ export class BaseInvoiceDto {
 
     @ApiProperty({ enum: DeliveryStatus })
     delivered: DeliveryStatus;
-}
-
-export class BaseInvoiceWithRelationsDto extends BaseInvoiceDto {
-    @ApiProperty({ type: IdDto })
-    partner: IdDto;
-
-    @ApiProperty({ type: NullableIdDto })
-    order: NullableIdDto;
 }

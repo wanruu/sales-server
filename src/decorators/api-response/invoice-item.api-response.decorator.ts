@@ -9,7 +9,7 @@ import {
     ApiUnauthorizedResponse,
     ApiBadRequestResponse,
 } from '@nestjs/swagger';
-import { BaseInvoiceItemWithRelationsDto } from 'src/dtos/common/base-invoice-item.dto';
+import { BaseInvoiceItemDto } from 'src/dtos/common/base-invoice-item.dto';
 import { FindManyInvoiceItemDto } from 'src/dtos/response/invoice-item/find-many-invoice-item.response.dto';
 
 export const CreateOneInvoiceItemApiResponses = () => {
@@ -17,7 +17,7 @@ export const CreateOneInvoiceItemApiResponses = () => {
         ApiBearerAuth(),
         ApiCreatedResponse({
             description: 'Returns the created invoice item.',
-            type: BaseInvoiceItemWithRelationsDto,
+            type: BaseInvoiceItemDto,
         }),
         ApiInternalServerErrorResponse({
             description: 'Internal server error.',
@@ -32,7 +32,7 @@ export const UpdateOneInvoiceItemApiResponses = () => {
         ApiBearerAuth(),
         ApiOkResponse({
             description: 'Returns the updated invoice item.',
-            type: BaseInvoiceItemWithRelationsDto,
+            type: BaseInvoiceItemDto,
         }),
         ApiInternalServerErrorResponse({
             description: 'Internal server error.',

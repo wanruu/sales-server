@@ -8,7 +8,7 @@ import {
 } from 'typeorm';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateInvoiceItemDto } from 'src/dtos/request/invoice-item/create-invoice-item.dto';
-import { BaseInvoiceItemWithRelationsDto } from 'src/dtos/common/base-invoice-item.dto';
+import { BaseInvoiceItemDto } from 'src/dtos/common/base-invoice-item.dto';
 import { UpdateInvoiceItemDto } from 'src/dtos/request/invoice-item/update-invoice-item.dto';
 
 @Injectable()
@@ -24,7 +24,7 @@ export class InvoiceItemsService {
 
     async createOne(
         dto: CreateInvoiceItemDto & { user: { id: number } },
-    ): Promise<BaseInvoiceItemWithRelationsDto> {
+    ): Promise<BaseInvoiceItemDto> {
         const invoiceItem = this.invoiceItemRepository.create(dto);
         const savedInvoiceItem =
             await this.invoiceItemRepository.save(invoiceItem);
@@ -36,7 +36,7 @@ export class InvoiceItemsService {
     async updateOne(
         options: FindOneOptions<InvoiceItem>,
         dto: UpdateInvoiceItemDto,
-    ): Promise<BaseInvoiceItemWithRelationsDto> {
+    ): Promise<BaseInvoiceItemDto> {
         const oldInvoiceItem =
             await this.invoiceItemRepository.findOne(options);
         if (!oldInvoiceItem) {
