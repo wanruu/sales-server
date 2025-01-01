@@ -22,6 +22,14 @@ export class InvoiceItemsService {
         return this.invoiceItemRepository.find(options);
     }
 
+    async findOne(options: FindOneOptions<InvoiceItem>): Promise<InvoiceItem> {
+        const invoiceItem = await this.invoiceItemRepository.findOne(options);
+        if (!invoiceItem) {
+            throw new NotFoundException('Invoice item not found.');
+        }
+        return invoiceItem;
+    }
+
     async createOne(
         dto: CreateInvoiceItemDto & { user: { id: number } },
     ): Promise<BaseInvoiceItemDto> {

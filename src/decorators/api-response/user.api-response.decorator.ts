@@ -1,9 +1,6 @@
 import {
-    ApiBadRequestResponse,
-    ApiBearerAuth,
     ApiConflictResponse,
     ApiCreatedResponse,
-    ApiInternalServerErrorResponse,
     ApiNoContentResponse,
     ApiNotFoundResponse,
     ApiOkResponse,
@@ -14,10 +11,11 @@ import { applyDecorators } from '@nestjs/common';
 import { BaseUserDto } from 'src/dtos/common/base-user.dto';
 import { LoginResponseDto } from 'src/dtos/response/user/login.response.dto';
 import { ErrorResponseDto } from 'src/dtos/response/common/error.response.dto';
+import { CommonApiResponses } from './common.api-response.decorator';
 
 export const FindOneUserApiResponses = () => {
     return applyDecorators(
-        ApiBearerAuth(),
+        CommonApiResponses(),
         ApiOkResponse({
             description: 'Returns the user with the given id.',
             schema: {
@@ -30,19 +28,12 @@ export const FindOneUserApiResponses = () => {
             description: 'User not found.',
             type: ErrorResponseDto,
         }),
-        ApiUnauthorizedResponse({
-            description: 'Unauthorized.',
-            type: ErrorResponseDto,
-        }),
-        ApiInternalServerErrorResponse({
-            description: 'Internal server error.',
-            type: ErrorResponseDto,
-        }),
     );
 };
 
 export const LoginApiResponses = () => {
     return applyDecorators(
+        CommonApiResponses(false),
         ApiOkResponse({
             description: 'Returns id and JWT token.',
             schema: {
@@ -55,19 +46,12 @@ export const LoginApiResponses = () => {
             description: 'Wrong username or password.',
             type: ErrorResponseDto,
         }),
-        ApiInternalServerErrorResponse({
-            description: 'Internal server error.',
-            type: ErrorResponseDto,
-        }),
-        ApiBadRequestResponse({
-            description: 'Bad request.',
-            type: ErrorResponseDto,
-        }),
     );
 };
 
 export const CreateOneUserApiResponses = () => {
     return applyDecorators(
+        CommonApiResponses(false),
         ApiCreatedResponse({
             description: 'Returns the created user.',
             schema: {
@@ -80,20 +64,12 @@ export const CreateOneUserApiResponses = () => {
             description: 'User already exists.',
             type: ErrorResponseDto,
         }),
-        ApiInternalServerErrorResponse({
-            description: 'Internal server error.',
-            type: ErrorResponseDto,
-        }),
-        ApiBadRequestResponse({
-            description: 'Bad request.',
-            type: ErrorResponseDto,
-        }),
     );
 };
 
 export const UpdateOneUserApiResponses = () => {
     return applyDecorators(
-        ApiBearerAuth(),
+        CommonApiResponses(),
         ApiOkResponse({
             description: 'Returns the updated user.',
             schema: {
@@ -106,20 +82,8 @@ export const UpdateOneUserApiResponses = () => {
             description: 'Username conflicts with another user.',
             type: ErrorResponseDto,
         }),
-        ApiInternalServerErrorResponse({
-            description: 'Internal server error.',
-            type: ErrorResponseDto,
-        }),
         ApiNotFoundResponse({
             description: 'User not found.',
-            type: ErrorResponseDto,
-        }),
-        ApiUnauthorizedResponse({
-            description: 'Unauthorized.',
-            type: ErrorResponseDto,
-        }),
-        ApiBadRequestResponse({
-            description: 'Bad request.',
             type: ErrorResponseDto,
         }),
     );
@@ -127,21 +91,13 @@ export const UpdateOneUserApiResponses = () => {
 
 export const DeleteOneUserApiResponses = () => {
     return applyDecorators(
-        ApiBearerAuth(),
+        CommonApiResponses(),
         ApiNoContentResponse({
             description: 'User deleted successfully.',
             content: { 'text/plain': {} },
         }),
         ApiNotFoundResponse({
             description: 'User not found.',
-            type: ErrorResponseDto,
-        }),
-        ApiInternalServerErrorResponse({
-            description: 'Internal server error.',
-            type: ErrorResponseDto,
-        }),
-        ApiUnauthorizedResponse({
-            description: 'Unauthorized.',
             type: ErrorResponseDto,
         }),
     );

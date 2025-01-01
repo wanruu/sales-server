@@ -4,6 +4,7 @@ import {
     HttpException,
     ConflictException,
     InternalServerErrorException,
+    NotFoundException,
 } from '@nestjs/common';
 import { BaseExceptionFilter } from '@nestjs/core';
 import { Constraint } from 'src/constants/constraint.constant';
@@ -21,17 +22,17 @@ function getHttpException(error: QueryFailedError): HttpException {
         case Constraint.UniquePartner:
             return new ConflictException('Partner already exists.');
         case Constraint.ForeignKeyPartner:
-            return new ConflictException('Partner not found.');
+            return new NotFoundException('Partner not found.');
         case Constraint.ForeignKeyProduct:
-            return new ConflictException('Product not found.');
+            return new NotFoundException('Product not found.');
         case Constraint.ForeignKeyInvoice:
-            return new ConflictException('Invoice not found.');
+            return new NotFoundException('Invoice not found.');
         case Constraint.ForeignKeyOrder:
-            return new ConflictException('Order not found.');
+            return new NotFoundException('Order not found.');
         case Constraint.ForeignKeyUser:
-            return new ConflictException('User not found.');
+            return new NotFoundException('User not found.');
         case Constraint.ForeignKeyOrderItem:
-            return new ConflictException('Order item not found.');
+            return new NotFoundException('Order item not found.');
     }
     return new InternalServerErrorException(error.message);
 }

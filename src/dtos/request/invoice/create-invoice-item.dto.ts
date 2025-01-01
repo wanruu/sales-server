@@ -18,7 +18,6 @@ import {
 } from 'class-validator';
 import { IdDto } from 'src/dtos/common/id.dto';
 import { CreateProductDto } from '../product/create-product.dto';
-import { MOCK_PRODUCTS } from 'src/constants/mock.constants';
 
 class _BaseCreateInvoiceItemDto {
     @ApiProperty({ example: 100 })
@@ -70,7 +69,20 @@ export class CreateOrderItemDto extends _BaseCreateInvoiceItemDto {
             { $ref: getSchemaPath(IdDto) },
             { $ref: getSchemaPath(CreateProductDto) },
         ],
-        examples: [{ id: 1 }, ...MOCK_PRODUCTS],
+        examples: [
+            { id: 1 },
+            {
+                material: 'material#1',
+                name: 'name#1',
+                spec: 'spec#1',
+                unit: 'unit#1',
+            },
+            {
+                name: 'name#2',
+                spec: 'spec#2',
+                unit: 'unit#2',
+            },
+        ],
     })
     @IsObject()
     @ValidateNested()

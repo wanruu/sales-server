@@ -1,24 +1,21 @@
 import { applyDecorators } from '@nestjs/common';
 import {
-    ApiBadRequestResponse,
-    ApiBearerAuth,
     ApiConflictResponse,
     ApiCreatedResponse,
-    ApiInternalServerErrorResponse,
     ApiNoContentResponse,
     ApiNotFoundResponse,
     ApiOkResponse,
-    ApiUnauthorizedResponse,
     getSchemaPath,
 } from '@nestjs/swagger';
 import { ErrorResponseDto } from 'src/dtos/response/common/error.response.dto';
 import { CreateOneInvoiceResponseDto } from 'src/dtos/response/invoice/create-one-invoice.response.dto';
 import { FindManyInvoiceResponseDto } from 'src/dtos/response/invoice/find-many-invoice.response.dto';
 import { FindOneInvoiceResponseDto } from 'src/dtos/response/invoice/find-one-invoice.response.dto';
+import { CommonApiResponses } from './common.api-response.decorator';
 
 export const CreateOneInvoiceApiResponses = () => {
     return applyDecorators(
-        ApiBearerAuth(),
+        CommonApiResponses(),
         ApiCreatedResponse({
             description: 'Returns the created invoice.',
             schema: {
@@ -33,16 +30,8 @@ export const CreateOneInvoiceApiResponses = () => {
             description: 'Invoice already exists.',
             type: ErrorResponseDto,
         }),
-        ApiInternalServerErrorResponse({
-            description: 'Internal server error.',
-            type: ErrorResponseDto,
-        }),
-        ApiUnauthorizedResponse({
-            description: 'Unauthorized.',
-            type: ErrorResponseDto,
-        }),
-        ApiBadRequestResponse({
-            description: 'Bad request.',
+        ApiNotFoundResponse({
+            description: 'Partner, product, order or order item not found.',
             type: ErrorResponseDto,
         }),
     );
@@ -50,7 +39,7 @@ export const CreateOneInvoiceApiResponses = () => {
 
 export const ReplaceOneInvoiceApiResponses = () => {
     return applyDecorators(
-        ApiBearerAuth(),
+        CommonApiResponses(),
         ApiOkResponse({
             description: 'Returns the replaced invoice.',
             schema: {
@@ -65,20 +54,8 @@ export const ReplaceOneInvoiceApiResponses = () => {
             description: 'Invoice already exists.',
             type: ErrorResponseDto,
         }),
-        ApiInternalServerErrorResponse({
-            description: 'Internal server error.',
-            type: ErrorResponseDto,
-        }),
         ApiNotFoundResponse({
-            description: 'Invoice not found.',
-            type: ErrorResponseDto,
-        }),
-        ApiUnauthorizedResponse({
-            description: 'Unauthorized.',
-            type: ErrorResponseDto,
-        }),
-        ApiBadRequestResponse({
-            description: 'Bad request.',
+            description: 'Partner, product, invoice or order item not found.',
             type: ErrorResponseDto,
         }),
     );
@@ -86,7 +63,7 @@ export const ReplaceOneInvoiceApiResponses = () => {
 
 export const DeleteOneInvoiceApiResponses = () => {
     return applyDecorators(
-        ApiBearerAuth(),
+        CommonApiResponses(),
         ApiNoContentResponse({
             description: 'Invoice deleted successfully.',
             content: { 'text/plain': {} },
@@ -95,20 +72,12 @@ export const DeleteOneInvoiceApiResponses = () => {
             description: 'Invoice not found.',
             type: ErrorResponseDto,
         }),
-        ApiInternalServerErrorResponse({
-            description: 'Internal server error.',
-            type: ErrorResponseDto,
-        }),
-        ApiUnauthorizedResponse({
-            description: 'Unauthorized.',
-            type: ErrorResponseDto,
-        }),
     );
 };
 
 export const FindOneInvoiceApiResponses = () => {
     return applyDecorators(
-        ApiBearerAuth(),
+        CommonApiResponses(),
         ApiOkResponse({
             description: 'Returns the invoice with the given id.',
             schema: {
@@ -123,20 +92,12 @@ export const FindOneInvoiceApiResponses = () => {
             description: 'Invoice not found.',
             type: ErrorResponseDto,
         }),
-        ApiUnauthorizedResponse({
-            description: 'Unauthorized.',
-            type: ErrorResponseDto,
-        }),
-        ApiInternalServerErrorResponse({
-            description: 'Internal server error.',
-            type: ErrorResponseDto,
-        }),
     );
 };
 
 export const FindManyInvoiceApiResponses = () => {
     return applyDecorators(
-        ApiBearerAuth(),
+        CommonApiResponses(),
         ApiOkResponse({
             description: 'Returns all invoices.',
             schema: {
@@ -150,10 +111,6 @@ export const FindManyInvoiceApiResponses = () => {
                     meta: { type: 'object' },
                 },
             },
-        }),
-        ApiUnauthorizedResponse({
-            description: 'Unauthorized.',
-            type: ErrorResponseDto,
         }),
     );
 };

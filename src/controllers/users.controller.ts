@@ -5,11 +5,11 @@ import {
     Get,
     HttpCode,
     HttpStatus,
-    NotFoundException,
     Param,
     ParseIntPipe,
     Patch,
     Post,
+    UnauthorizedException,
     UseGuards,
 } from '@nestjs/common';
 import { UsersService } from 'src/services/users.service';
@@ -44,7 +44,7 @@ export class UsersController {
         @User('id') userId: number,
     ) {
         if (userId !== id) {
-            throw new NotFoundException('User not found.');
+            throw new UnauthorizedException('Permisson denied.');
         }
         const data = await this.usersService.findOne({ where: { id } });
         return { data };
@@ -76,7 +76,7 @@ export class UsersController {
         @User('id') userId: number,
     ) {
         if (userId !== id) {
-            throw new NotFoundException('User not found.');
+            throw new UnauthorizedException('Permisson denied.');
         }
         const data = await this.usersService.updateOne({ where: { id } }, dto);
         return { data };
@@ -91,7 +91,7 @@ export class UsersController {
         @User('id') userId: number,
     ) {
         if (userId !== id) {
-            throw new NotFoundException('User not found.');
+            throw new UnauthorizedException('Permisson denied.');
         }
         return this.usersService.deleteMany({ id });
     }

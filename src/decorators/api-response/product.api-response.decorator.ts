@@ -1,24 +1,21 @@
 import { applyDecorators } from '@nestjs/common';
 import {
-    ApiBadRequestResponse,
-    ApiBearerAuth,
     ApiConflictResponse,
     ApiCreatedResponse,
-    ApiInternalServerErrorResponse,
     ApiNoContentResponse,
     ApiNotFoundResponse,
     ApiOkResponse,
-    ApiUnauthorizedResponse,
     getSchemaPath,
 } from '@nestjs/swagger';
 import { BaseProductDto } from 'src/dtos/common/base-product.dto';
 import { ErrorResponseDto } from 'src/dtos/response/common/error.response.dto';
 import { FindManyProductResponseDto } from 'src/dtos/response/product/find-many-product.response.dto';
 import { FindOneProductResponseDto } from 'src/dtos/response/product/find-one-product.response.dto';
+import { CommonApiResponses } from './common.api-response.decorator';
 
 export const CreateOneProductApiResponses = () => {
     return applyDecorators(
-        ApiBearerAuth(),
+        CommonApiResponses(),
         ApiCreatedResponse({
             description: 'Returns the created product.',
             schema: {
@@ -33,24 +30,12 @@ export const CreateOneProductApiResponses = () => {
             description: 'Product already exists.',
             type: ErrorResponseDto,
         }),
-        ApiInternalServerErrorResponse({
-            description: 'Internal server error.',
-            type: ErrorResponseDto,
-        }),
-        ApiUnauthorizedResponse({
-            description: 'Unauthorized.',
-            type: ErrorResponseDto,
-        }),
-        ApiBadRequestResponse({
-            description: 'Bad request.',
-            type: ErrorResponseDto,
-        }),
     );
 };
 
 export const UpdateOneProductApiResponses = () => {
     return applyDecorators(
-        ApiBearerAuth(),
+        CommonApiResponses(),
         ApiOkResponse({
             description: 'Returns the updated product.',
             schema: {
@@ -65,20 +50,8 @@ export const UpdateOneProductApiResponses = () => {
             description: 'Product already exists.',
             type: ErrorResponseDto,
         }),
-        ApiInternalServerErrorResponse({
-            description: 'Internal server error.',
-            type: ErrorResponseDto,
-        }),
         ApiNotFoundResponse({
             description: 'Product not found.',
-            type: ErrorResponseDto,
-        }),
-        ApiUnauthorizedResponse({
-            description: 'Unauthorized.',
-            type: ErrorResponseDto,
-        }),
-        ApiBadRequestResponse({
-            description: 'Bad request.',
             type: ErrorResponseDto,
         }),
     );
@@ -86,7 +59,7 @@ export const UpdateOneProductApiResponses = () => {
 
 export const DeleteOneProductApiResponses = () => {
     return applyDecorators(
-        ApiBearerAuth(),
+        CommonApiResponses(),
         ApiNoContentResponse({
             description: 'Product deleted successfully.',
             content: { 'text/plain': {} },
@@ -95,20 +68,12 @@ export const DeleteOneProductApiResponses = () => {
             description: 'Product not found.',
             type: ErrorResponseDto,
         }),
-        ApiInternalServerErrorResponse({
-            description: 'Internal server error.',
-            type: ErrorResponseDto,
-        }),
-        ApiUnauthorizedResponse({
-            description: 'Unauthorized.',
-            type: ErrorResponseDto,
-        }),
     );
 };
 
 export const FindOneProductApiResponses = () => {
     return applyDecorators(
-        ApiBearerAuth(),
+        CommonApiResponses(),
         ApiOkResponse({
             description: 'Returns the product with the given id.',
             schema: {
@@ -123,20 +88,12 @@ export const FindOneProductApiResponses = () => {
             description: 'Product not found.',
             type: ErrorResponseDto,
         }),
-        ApiUnauthorizedResponse({
-            description: 'Unauthorized.',
-            type: ErrorResponseDto,
-        }),
-        ApiInternalServerErrorResponse({
-            description: 'Internal server error.',
-            type: ErrorResponseDto,
-        }),
     );
 };
 
 export const FindManyProductApiResponses = () => {
     return applyDecorators(
-        ApiBearerAuth(),
+        CommonApiResponses(),
         ApiOkResponse({
             description: 'Returns all products.',
             schema: {
@@ -150,10 +107,6 @@ export const FindManyProductApiResponses = () => {
                     meta: { type: 'object' },
                 },
             },
-        }),
-        ApiUnauthorizedResponse({
-            description: 'Unauthorized.',
-            type: ErrorResponseDto,
         }),
     );
 };
