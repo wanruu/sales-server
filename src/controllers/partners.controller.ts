@@ -15,7 +15,7 @@ import { AuthGuard } from 'src/guards/auth.guard';
 import { PartnersService } from 'src/services/partners.service';
 import { User } from 'src/decorators/user.decorator';
 import { CreatePartnerDto } from 'src/dtos/request/partner/create-partner.dto';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiExtraModels, ApiTags } from '@nestjs/swagger';
 import {
     CreateOnePartnerApiResponses,
     DeleteOnePartnerApiResponses,
@@ -31,52 +31,61 @@ import { FindManyPartnerResponseDto } from 'src/dtos/response/partner/find-many-
 @ApiTags('Partners')
 @Controller('partners')
 @UseGuards(AuthGuard)
+@ApiExtraModels(
+    BasePartnerDto,
+    FindOnePartnerResponseDto,
+    FindManyPartnerResponseDto,
+)
 export class PartnersController {
     constructor(private partnersService: PartnersService) {}
 
     @Get()
     @HttpCode(HttpStatus.OK)
     @FindManyPartnerApiResponses()
-    findAll(@User('id') userId: number): Promise<FindManyPartnerResponseDto[]> {
-        return this.partnersService.findMany({
+    async findAll(@User('id') userId: number) {
+        const data = await this.partnersService.findMany({
             where: { user: { id: userId } },
         });
+        return { data };
     }
 
     @Get(':id')
     @HttpCode(HttpStatus.OK)
     @FindOnePartnerApiResponses()
-    findById(
+    async findById(
         @Param('id', new ParseIntPipe()) id: number,
         @User('id') userId: number,
-    ): Promise<FindOnePartnerResponseDto> {
-        return this.partnersService.findOne({
+    ) {
+        const data = await this.partnersService.findOne({
             where: { id, user: { id: userId } },
         });
+        return { data };
     }
 
     @Post()
     @HttpCode(HttpStatus.CREATED)
     @CreateOnePartnerApiResponses()
-    createOne(
-        @Body() dto: CreatePartnerDto,
-        @User('id') userId: number,
-    ): Promise<BasePartnerDto> {
-        return this.partnersService.createOne({ ...dto, user: { id: userId } });
+    async createOne(@Body() dto: CreatePartnerDto, @User('id') userId: number) {
+        const data = await this.partnersService.createOne({
+            ...dto,
+            user: { id: userId },
+        });
+        return { data };
     }
 
     @Patch(':id')
     @HttpCode(HttpStatus.OK)
     @UpdateOnePartnerApiResponses()
-    updateById(
+    async updateById(
         @Param('id', new ParseIntPipe()) id: number,
         @Body() dto: UpdatePartnerDto,
         @User('id') userId: number,
-    ): Promise<BasePartnerDto> {
-        return this.partnersService.updateOne(
+    ) {
+        const data = await this.partnersService.updateOne(
             { where: { id, user: { id: userId } } },
             dto,
         );
+        return { data };
     }
 
     @Delete(':id')
@@ -85,7 +94,7 @@ export class PartnersController {
     deleteById(
         @Param('id', new ParseIntPipe()) id: number,
         @User('id') userId: number,
-    ): Promise<void> {
+    ) {
         return this.partnersService.deleteMany({ id, user: { id: userId } });
     }
 }

@@ -9,8 +9,10 @@ import {
     ApiNotFoundResponse,
     ApiOkResponse,
     ApiUnauthorizedResponse,
+    getSchemaPath,
 } from '@nestjs/swagger';
 import { BasePartnerDto } from 'src/dtos/common/base-partner.dto';
+import { ErrorResponseDto } from 'src/dtos/response/common/error.response.dto';
 import { FindManyPartnerResponseDto } from 'src/dtos/response/partner/find-many-partner.response.dto';
 import { FindOnePartnerResponseDto } from 'src/dtos/response/partner/find-one-partner.response.dto';
 
@@ -19,14 +21,30 @@ export const CreateOnePartnerApiResponses = () => {
         ApiBearerAuth(),
         ApiCreatedResponse({
             description: 'Returns the created partner.',
-            type: BasePartnerDto,
+            schema: {
+                properties: {
+                    data: {
+                        $ref: getSchemaPath(BasePartnerDto),
+                    },
+                },
+            },
         }),
-        ApiConflictResponse({ description: 'Partner already exists.' }),
+        ApiConflictResponse({
+            description: 'Partner already exists.',
+            type: ErrorResponseDto,
+        }),
         ApiInternalServerErrorResponse({
             description: 'Internal server error.',
+            type: ErrorResponseDto,
         }),
-        ApiUnauthorizedResponse({ description: 'Unauthorized.' }),
-        ApiBadRequestResponse({ description: 'Bad request.' }),
+        ApiUnauthorizedResponse({
+            description: 'Unauthorized.',
+            type: ErrorResponseDto,
+        }),
+        ApiBadRequestResponse({
+            description: 'Bad request.',
+            type: ErrorResponseDto,
+        }),
     );
 };
 
@@ -35,15 +53,34 @@ export const UpdateOnePartnerApiResponses = () => {
         ApiBearerAuth(),
         ApiOkResponse({
             description: 'Returns the updated partner.',
-            type: BasePartnerDto,
+            schema: {
+                properties: {
+                    data: {
+                        $ref: getSchemaPath(BasePartnerDto),
+                    },
+                },
+            },
         }),
-        ApiConflictResponse({ description: 'Partner already exists.' }),
+        ApiConflictResponse({
+            description: 'Partner already exists.',
+            type: ErrorResponseDto,
+        }),
         ApiInternalServerErrorResponse({
             description: 'Internal server error.',
+            type: ErrorResponseDto,
         }),
-        ApiNotFoundResponse({ description: 'Partner not found.' }),
-        ApiUnauthorizedResponse({ description: 'Unauthorized.' }),
-        ApiBadRequestResponse({ description: 'Bad request.' }),
+        ApiNotFoundResponse({
+            description: 'Partner not found.',
+            type: ErrorResponseDto,
+        }),
+        ApiUnauthorizedResponse({
+            description: 'Unauthorized.',
+            type: ErrorResponseDto,
+        }),
+        ApiBadRequestResponse({
+            description: 'Bad request.',
+            type: ErrorResponseDto,
+        }),
     );
 };
 
@@ -54,11 +91,18 @@ export const DeleteOnePartnerApiResponses = () => {
             description: 'Partner deleted successfully.',
             content: { 'text/plain': {} },
         }),
-        ApiNotFoundResponse({ description: 'Partner not found.' }),
+        ApiNotFoundResponse({
+            description: 'Partner not found.',
+            type: ErrorResponseDto,
+        }),
         ApiInternalServerErrorResponse({
             description: 'Internal server error.',
+            type: ErrorResponseDto,
         }),
-        ApiUnauthorizedResponse({ description: 'Unauthorized.' }),
+        ApiUnauthorizedResponse({
+            description: 'Unauthorized.',
+            type: ErrorResponseDto,
+        }),
     );
 };
 
@@ -67,12 +111,25 @@ export const FindOnePartnerApiResponses = () => {
         ApiBearerAuth(),
         ApiOkResponse({
             description: 'Returns the partner with the given id.',
-            type: FindOnePartnerResponseDto,
+            schema: {
+                properties: {
+                    data: {
+                        $ref: getSchemaPath(FindOnePartnerResponseDto),
+                    },
+                },
+            },
         }),
-        ApiNotFoundResponse({ description: 'Partner not found.' }),
-        ApiUnauthorizedResponse({ description: 'Unauthorized.' }),
+        ApiNotFoundResponse({
+            description: 'Partner not found.',
+            type: ErrorResponseDto,
+        }),
+        ApiUnauthorizedResponse({
+            description: 'Unauthorized.',
+            type: ErrorResponseDto,
+        }),
         ApiInternalServerErrorResponse({
             description: 'Internal server error.',
+            type: ErrorResponseDto,
         }),
     );
 };
@@ -82,9 +139,21 @@ export const FindManyPartnerApiResponses = () => {
         ApiBearerAuth(),
         ApiOkResponse({
             description: 'Returns all partners.',
-            isArray: true,
-            type: FindManyPartnerResponseDto,
+            schema: {
+                properties: {
+                    data: {
+                        type: 'array',
+                        items: {
+                            $ref: getSchemaPath(FindManyPartnerResponseDto),
+                        },
+                    },
+                    meta: { type: 'object' },
+                },
+            },
         }),
-        ApiUnauthorizedResponse({ description: 'Unauthorized.' }),
+        ApiUnauthorizedResponse({
+            description: 'Unauthorized.',
+            type: ErrorResponseDto,
+        }),
     );
 };

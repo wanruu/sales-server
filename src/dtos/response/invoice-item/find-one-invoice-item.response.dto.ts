@@ -4,7 +4,7 @@ import { BaseInvoiceDto } from 'src/dtos/common/base-invoice.dto';
 import { BaseProductDto } from 'src/dtos/common/base-product.dto';
 import { NullableIdDto } from 'src/dtos/common/id.dto';
 
-export class FindOneInvoiceItemDto extends BaseInvoiceItemDto {
+export class FindOneInvoiceItemResponseDto extends BaseInvoiceItemDto {
     @ApiProperty({ type: BaseProductDto })
     product: BaseProductDto;
 

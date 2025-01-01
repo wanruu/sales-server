@@ -9,7 +9,9 @@ import {
     ApiNotFoundResponse,
     ApiOkResponse,
     ApiUnauthorizedResponse,
+    getSchemaPath,
 } from '@nestjs/swagger';
+import { ErrorResponseDto } from 'src/dtos/response/common/error.response.dto';
 import { CreateOneInvoiceResponseDto } from 'src/dtos/response/invoice/create-one-invoice.response.dto';
 import { FindManyInvoiceResponseDto } from 'src/dtos/response/invoice/find-many-invoice.response.dto';
 import { FindOneInvoiceResponseDto } from 'src/dtos/response/invoice/find-one-invoice.response.dto';
@@ -19,14 +21,30 @@ export const CreateOneInvoiceApiResponses = () => {
         ApiBearerAuth(),
         ApiCreatedResponse({
             description: 'Returns the created invoice.',
-            type: CreateOneInvoiceResponseDto,
+            schema: {
+                properties: {
+                    data: {
+                        $ref: getSchemaPath(CreateOneInvoiceResponseDto),
+                    },
+                },
+            },
         }),
-        ApiConflictResponse({ description: 'Invoice already exists.' }),
+        ApiConflictResponse({
+            description: 'Invoice already exists.',
+            type: ErrorResponseDto,
+        }),
         ApiInternalServerErrorResponse({
             description: 'Internal server error.',
+            type: ErrorResponseDto,
         }),
-        ApiUnauthorizedResponse({ description: 'Unauthorized.' }),
-        ApiBadRequestResponse({ description: 'Bad request.' }),
+        ApiUnauthorizedResponse({
+            description: 'Unauthorized.',
+            type: ErrorResponseDto,
+        }),
+        ApiBadRequestResponse({
+            description: 'Bad request.',
+            type: ErrorResponseDto,
+        }),
     );
 };
 
@@ -35,15 +53,34 @@ export const ReplaceOneInvoiceApiResponses = () => {
         ApiBearerAuth(),
         ApiOkResponse({
             description: 'Returns the replaced invoice.',
-            type: CreateOneInvoiceResponseDto,
+            schema: {
+                properties: {
+                    data: {
+                        $ref: getSchemaPath(CreateOneInvoiceResponseDto),
+                    },
+                },
+            },
         }),
-        ApiConflictResponse({ description: 'Invoice already exists.' }),
+        ApiConflictResponse({
+            description: 'Invoice already exists.',
+            type: ErrorResponseDto,
+        }),
         ApiInternalServerErrorResponse({
             description: 'Internal server error.',
+            type: ErrorResponseDto,
         }),
-        ApiNotFoundResponse({ description: 'Invoice not found.' }),
-        ApiUnauthorizedResponse({ description: 'Unauthorized.' }),
-        ApiBadRequestResponse({ description: 'Bad request.' }),
+        ApiNotFoundResponse({
+            description: 'Invoice not found.',
+            type: ErrorResponseDto,
+        }),
+        ApiUnauthorizedResponse({
+            description: 'Unauthorized.',
+            type: ErrorResponseDto,
+        }),
+        ApiBadRequestResponse({
+            description: 'Bad request.',
+            type: ErrorResponseDto,
+        }),
     );
 };
 
@@ -54,11 +91,18 @@ export const DeleteOneInvoiceApiResponses = () => {
             description: 'Invoice deleted successfully.',
             content: { 'text/plain': {} },
         }),
-        ApiNotFoundResponse({ description: 'Invoice not found.' }),
+        ApiNotFoundResponse({
+            description: 'Invoice not found.',
+            type: ErrorResponseDto,
+        }),
         ApiInternalServerErrorResponse({
             description: 'Internal server error.',
+            type: ErrorResponseDto,
         }),
-        ApiUnauthorizedResponse({ description: 'Unauthorized.' }),
+        ApiUnauthorizedResponse({
+            description: 'Unauthorized.',
+            type: ErrorResponseDto,
+        }),
     );
 };
 
@@ -67,12 +111,25 @@ export const FindOneInvoiceApiResponses = () => {
         ApiBearerAuth(),
         ApiOkResponse({
             description: 'Returns the invoice with the given id.',
-            type: FindOneInvoiceResponseDto,
+            schema: {
+                properties: {
+                    data: {
+                        $ref: getSchemaPath(FindOneInvoiceResponseDto),
+                    },
+                },
+            },
         }),
-        ApiNotFoundResponse({ description: 'Invoice not found.' }),
-        ApiUnauthorizedResponse({ description: 'Unauthorized.' }),
+        ApiNotFoundResponse({
+            description: 'Invoice not found.',
+            type: ErrorResponseDto,
+        }),
+        ApiUnauthorizedResponse({
+            description: 'Unauthorized.',
+            type: ErrorResponseDto,
+        }),
         ApiInternalServerErrorResponse({
             description: 'Internal server error.',
+            type: ErrorResponseDto,
         }),
     );
 };
@@ -82,9 +139,21 @@ export const FindManyInvoiceApiResponses = () => {
         ApiBearerAuth(),
         ApiOkResponse({
             description: 'Returns all invoices.',
-            isArray: true,
-            type: FindManyInvoiceResponseDto,
+            schema: {
+                properties: {
+                    data: {
+                        type: 'array',
+                        items: {
+                            $ref: getSchemaPath(FindManyInvoiceResponseDto),
+                        },
+                    },
+                    meta: { type: 'object' },
+                },
+            },
         }),
-        ApiUnauthorizedResponse({ description: 'Unauthorized.' }),
+        ApiUnauthorizedResponse({
+            description: 'Unauthorized.',
+            type: ErrorResponseDto,
+        }),
     );
 };

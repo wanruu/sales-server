@@ -9,8 +9,10 @@ import {
     ApiNotFoundResponse,
     ApiOkResponse,
     ApiUnauthorizedResponse,
+    getSchemaPath,
 } from '@nestjs/swagger';
 import { BaseProductDto } from 'src/dtos/common/base-product.dto';
+import { ErrorResponseDto } from 'src/dtos/response/common/error.response.dto';
 import { FindManyProductResponseDto } from 'src/dtos/response/product/find-many-product.response.dto';
 import { FindOneProductResponseDto } from 'src/dtos/response/product/find-one-product.response.dto';
 
@@ -19,14 +21,30 @@ export const CreateOneProductApiResponses = () => {
         ApiBearerAuth(),
         ApiCreatedResponse({
             description: 'Returns the created product.',
-            type: BaseProductDto,
+            schema: {
+                properties: {
+                    data: {
+                        $ref: getSchemaPath(BaseProductDto),
+                    },
+                },
+            },
         }),
-        ApiConflictResponse({ description: 'Product already exists.' }),
+        ApiConflictResponse({
+            description: 'Product already exists.',
+            type: ErrorResponseDto,
+        }),
         ApiInternalServerErrorResponse({
             description: 'Internal server error.',
+            type: ErrorResponseDto,
         }),
-        ApiUnauthorizedResponse({ description: 'Unauthorized.' }),
-        ApiBadRequestResponse({ description: 'Bad request.' }),
+        ApiUnauthorizedResponse({
+            description: 'Unauthorized.',
+            type: ErrorResponseDto,
+        }),
+        ApiBadRequestResponse({
+            description: 'Bad request.',
+            type: ErrorResponseDto,
+        }),
     );
 };
 
@@ -35,15 +53,34 @@ export const UpdateOneProductApiResponses = () => {
         ApiBearerAuth(),
         ApiOkResponse({
             description: 'Returns the updated product.',
-            type: BaseProductDto,
+            schema: {
+                properties: {
+                    data: {
+                        $ref: getSchemaPath(BaseProductDto),
+                    },
+                },
+            },
         }),
-        ApiConflictResponse({ description: 'Product already exists.' }),
+        ApiConflictResponse({
+            description: 'Product already exists.',
+            type: ErrorResponseDto,
+        }),
         ApiInternalServerErrorResponse({
             description: 'Internal server error.',
+            type: ErrorResponseDto,
         }),
-        ApiNotFoundResponse({ description: 'Product not found.' }),
-        ApiUnauthorizedResponse({ description: 'Unauthorized.' }),
-        ApiBadRequestResponse({ description: 'Bad request.' }),
+        ApiNotFoundResponse({
+            description: 'Product not found.',
+            type: ErrorResponseDto,
+        }),
+        ApiUnauthorizedResponse({
+            description: 'Unauthorized.',
+            type: ErrorResponseDto,
+        }),
+        ApiBadRequestResponse({
+            description: 'Bad request.',
+            type: ErrorResponseDto,
+        }),
     );
 };
 
@@ -54,11 +91,18 @@ export const DeleteOneProductApiResponses = () => {
             description: 'Product deleted successfully.',
             content: { 'text/plain': {} },
         }),
-        ApiNotFoundResponse({ description: 'Product not found.' }),
+        ApiNotFoundResponse({
+            description: 'Product not found.',
+            type: ErrorResponseDto,
+        }),
         ApiInternalServerErrorResponse({
             description: 'Internal server error.',
+            type: ErrorResponseDto,
         }),
-        ApiUnauthorizedResponse({ description: 'Unauthorized.' }),
+        ApiUnauthorizedResponse({
+            description: 'Unauthorized.',
+            type: ErrorResponseDto,
+        }),
     );
 };
 
@@ -67,12 +111,25 @@ export const FindOneProductApiResponses = () => {
         ApiBearerAuth(),
         ApiOkResponse({
             description: 'Returns the product with the given id.',
-            type: FindOneProductResponseDto,
+            schema: {
+                properties: {
+                    data: {
+                        $ref: getSchemaPath(FindOneProductResponseDto),
+                    },
+                },
+            },
         }),
-        ApiNotFoundResponse({ description: 'Product not found.' }),
-        ApiUnauthorizedResponse({ description: 'Unauthorized.' }),
+        ApiNotFoundResponse({
+            description: 'Product not found.',
+            type: ErrorResponseDto,
+        }),
+        ApiUnauthorizedResponse({
+            description: 'Unauthorized.',
+            type: ErrorResponseDto,
+        }),
         ApiInternalServerErrorResponse({
             description: 'Internal server error.',
+            type: ErrorResponseDto,
         }),
     );
 };
@@ -82,9 +139,21 @@ export const FindManyProductApiResponses = () => {
         ApiBearerAuth(),
         ApiOkResponse({
             description: 'Returns all products.',
-            isArray: true,
-            type: FindManyProductResponseDto,
+            schema: {
+                properties: {
+                    data: {
+                        type: 'array',
+                        items: {
+                            $ref: getSchemaPath(FindManyProductResponseDto),
+                        },
+                    },
+                    meta: { type: 'object' },
+                },
+            },
         }),
-        ApiUnauthorizedResponse({ description: 'Unauthorized.' }),
+        ApiUnauthorizedResponse({
+            description: 'Unauthorized.',
+            type: ErrorResponseDto,
+        }),
     );
 };

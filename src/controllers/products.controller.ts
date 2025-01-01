@@ -15,7 +15,7 @@ import { ProductsService } from 'src/services/products.service';
 import { AuthGuard } from 'src/guards/auth.guard';
 import { CreateProductDto } from 'src/dtos/request/product/create-product.dto';
 import { User } from 'src/decorators/user.decorator';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiExtraModels, ApiTags } from '@nestjs/swagger';
 import {
     CreateOneProductApiResponses,
     DeleteOneProductApiResponses,
@@ -31,52 +31,61 @@ import { UpdateProductDto } from 'src/dtos/request/product/update-product.dto';
 @ApiTags('Products')
 @Controller('products')
 @UseGuards(AuthGuard)
+@ApiExtraModels(
+    BaseProductDto,
+    FindOneProductResponseDto,
+    FindManyProductResponseDto,
+)
 export class ProductsController {
     constructor(private productsService: ProductsService) {}
 
     @Get()
     @HttpCode(HttpStatus.OK)
     @FindManyProductApiResponses()
-    findAll(@User('id') userId: number): Promise<FindManyProductResponseDto[]> {
-        return this.productsService.findMany({
+    async findAll(@User('id') userId: number) {
+        const data = await this.productsService.findMany({
             where: { user: { id: userId } },
         });
+        return { data };
     }
 
     @Get(':id')
     @HttpCode(HttpStatus.OK)
     @FindOneProductApiResponses()
-    findById(
+    async findById(
         @Param('id', new ParseIntPipe()) id: number,
         @User('id') userId: number,
-    ): Promise<FindOneProductResponseDto> {
-        return this.productsService.findOne({
+    ) {
+        const data = await this.productsService.findOne({
             where: { id, user: { id: userId } },
         });
+        return { data };
     }
 
     @Post()
     @HttpCode(HttpStatus.CREATED)
     @CreateOneProductApiResponses()
-    createOne(
-        @Body() dto: CreateProductDto,
-        @User('id') userId: number,
-    ): Promise<BaseProductDto> {
-        return this.productsService.createOne({ ...dto, user: { id: userId } });
+    async createOne(@Body() dto: CreateProductDto, @User('id') userId: number) {
+        const data = await this.productsService.createOne({
+            ...dto,
+            user: { id: userId },
+        });
+        return { data };
     }
 
     @Patch(':id')
     @HttpCode(HttpStatus.OK)
     @UpdateOneProductApiResponses()
-    updateById(
+    async updateById(
         @Param('id', new ParseIntPipe()) id: number,
         @Body() dto: UpdateProductDto,
         @User('id') userId: number,
-    ): Promise<BaseProductDto> {
-        return this.productsService.updateOne(
+    ) {
+        const data = await this.productsService.updateOne(
             { where: { id, user: { id: userId } } },
             dto,
         );
+        return { data };
     }
 
     @Delete(':id')
@@ -85,7 +94,7 @@ export class ProductsController {
     deleteById(
         @Param('id', new ParseIntPipe()) id: number,
         @User('id') userId: number,
-    ): Promise<void> {
+    ) {
         return this.productsService.deleteMany({ id, user: { id: userId } });
     }
 }

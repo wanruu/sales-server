@@ -11,7 +11,7 @@ import {
     Put,
     UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiExtraModels, ApiTags } from '@nestjs/swagger';
 import {
     CreateOneInvoiceApiResponses,
     DeleteOneInvoiceApiResponses,
@@ -33,20 +33,26 @@ import { InvoicesService } from 'src/services/invoices.service';
 @ApiTags('Invoices')
 @UseGuards(AuthGuard)
 @Controller('invoices')
+@ApiExtraModels(
+    CreateOneInvoiceResponseDto,
+    FindOneInvoiceResponseDto,
+    FindManyInvoiceResponseDto,
+)
 export class InvoicesController {
     constructor(private invoicesService: InvoicesService) {}
 
     @Get()
     @HttpCode(HttpStatus.OK)
     @FindManyInvoiceApiResponses()
-    findAll(@User('id') userId: number): Promise<FindManyInvoiceResponseDto[]> {
-        return this.invoicesService.findMany({
+    async findAll(@User('id') userId: number) {
+        const data = await this.invoicesService.findMany({
             where: { user: { id: userId } },
             loadRelationIds: {
                 relations: ['partner', 'order'],
                 disableMixedMap: true,
             },
         });
+        return { data };
     }
 
     @Get(':id')
@@ -55,7 +61,7 @@ export class InvoicesController {
     async findById(
         @Param('id', new ParseIntPipe()) id: number,
         @User('id') userId: number,
-    ): Promise<FindOneInvoiceResponseDto> {
+    ) {
         const invoice = await this.invoicesService.findOne({
             where: { id, user: { id: userId } },
             loadRelationIds: {
@@ -67,39 +73,42 @@ export class InvoicesController {
                 invoiceItems: { product: true, orderItem: true },
             },
         });
-
         // TODO: find a better way to handle this
-        return {
+        const data = {
             ...invoice,
             invoiceItems: invoice.invoiceItems.map((item) => ({
                 ...item,
                 orderItem: { id: item.orderItem?.id || null },
             })),
         };
+
+        return { data };
     }
 
     @Post()
     @HttpCode(HttpStatus.CREATED)
     @CreateOneInvoiceApiResponses()
-    createOne(
-        @Body() dto: CreateInvoiceDto,
-        @User('id') userId: number,
-    ): Promise<CreateOneInvoiceResponseDto> {
-        return this.invoicesService.createOne({ ...dto, user: { id: userId } });
+    async createOne(@Body() dto: CreateInvoiceDto, @User('id') userId: number) {
+        const data = await this.invoicesService.createOne({
+            ...dto,
+            user: { id: userId },
+        });
+        return { data };
     }
 
     @Put(':id')
     @HttpCode(HttpStatus.OK)
     @ReplaceOneInvoiceApiResponses()
-    updateById(
+    async updateById(
         @Param('id', new ParseIntPipe()) id: number,
         @Body() dto: ReplaceInvoiceDto,
         @User('id') userId: number,
-    ): Promise<CreateOneInvoiceResponseDto> {
-        return this.invoicesService.replaceOne(
+    ) {
+        const data = await this.invoicesService.replaceOne(
             { where: { id, user: { id: userId } } },
             { ...dto, user: { id: userId } },
         );
+        return { data };
     }
 
     @Delete(':id')
@@ -108,7 +117,7 @@ export class InvoicesController {
     deleteById(
         @Param('id', new ParseIntPipe()) id: number,
         @User('id') userId: number,
-    ): Promise<void> {
+    ) {
         return this.invoicesService.deleteMany({ id, user: { id: userId } });
     }
 }

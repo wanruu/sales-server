@@ -8,22 +8,35 @@ import {
     ApiOkResponse,
     ApiUnauthorizedResponse,
     ApiBadRequestResponse,
+    getSchemaPath,
 } from '@nestjs/swagger';
 import { BaseInvoiceItemDto } from 'src/dtos/common/base-invoice-item.dto';
-import { FindManyInvoiceItemDto } from 'src/dtos/response/invoice-item/find-many-invoice-item.response.dto';
+import { ErrorResponseDto } from 'src/dtos/response/common/error.response.dto';
+import { FindManyInvoiceResponseItemDto } from 'src/dtos/response/invoice-item/find-many-invoice-item.response.dto';
 
 export const CreateOneInvoiceItemApiResponses = () => {
     return applyDecorators(
         ApiBearerAuth(),
         ApiCreatedResponse({
             description: 'Returns the created invoice item.',
-            type: BaseInvoiceItemDto,
+            schema: {
+                properties: {
+                    data: { $ref: getSchemaPath(BaseInvoiceItemDto) },
+                },
+            },
         }),
         ApiInternalServerErrorResponse({
             description: 'Internal server error.',
+            type: ErrorResponseDto,
         }),
-        ApiUnauthorizedResponse({ description: 'Unauthorized.' }),
-        ApiBadRequestResponse({ description: 'Bad request.' }),
+        ApiUnauthorizedResponse({
+            description: 'Unauthorized.',
+            type: ErrorResponseDto,
+        }),
+        ApiBadRequestResponse({
+            description: 'Bad request.',
+            type: ErrorResponseDto,
+        }),
     );
 };
 
@@ -32,14 +45,28 @@ export const UpdateOneInvoiceItemApiResponses = () => {
         ApiBearerAuth(),
         ApiOkResponse({
             description: 'Returns the updated invoice item.',
-            type: BaseInvoiceItemDto,
+            schema: {
+                properties: {
+                    data: { $ref: getSchemaPath(BaseInvoiceItemDto) },
+                },
+            },
         }),
         ApiInternalServerErrorResponse({
             description: 'Internal server error.',
+            type: ErrorResponseDto,
         }),
-        ApiNotFoundResponse({ description: 'Invoice item not found.' }),
-        ApiUnauthorizedResponse({ description: 'Unauthorized.' }),
-        ApiBadRequestResponse({ description: 'Bad request.' }),
+        ApiNotFoundResponse({
+            description: 'Invoice item not found.',
+            type: ErrorResponseDto,
+        }),
+        ApiUnauthorizedResponse({
+            description: 'Unauthorized.',
+            type: ErrorResponseDto,
+        }),
+        ApiBadRequestResponse({
+            description: 'Bad request.',
+            type: ErrorResponseDto,
+        }),
     );
 };
 
@@ -50,11 +77,18 @@ export const DeleteOneInvoiceItemApiResponses = () => {
             description: 'Invoice item deleted successfully.',
             content: { 'text/plain': {} },
         }),
-        ApiNotFoundResponse({ description: 'Invoice item not found.' }),
+        ApiNotFoundResponse({
+            description: 'Invoice item not found.',
+            type: ErrorResponseDto,
+        }),
         ApiInternalServerErrorResponse({
             description: 'Internal server error.',
+            type: ErrorResponseDto,
         }),
-        ApiUnauthorizedResponse({ description: 'Unauthorized.' }),
+        ApiUnauthorizedResponse({
+            description: 'Unauthorized.',
+            type: ErrorResponseDto,
+        }),
     );
 };
 
@@ -63,9 +97,21 @@ export const FindManyInvoiceItemApiResponses = () => {
         ApiBearerAuth(),
         ApiOkResponse({
             description: 'Returns all invoice items.',
-            isArray: true,
-            type: FindManyInvoiceItemDto,
+            schema: {
+                properties: {
+                    data: {
+                        type: 'array',
+                        items: {
+                            $ref: getSchemaPath(FindManyInvoiceResponseItemDto),
+                        },
+                    },
+                    meta: { type: 'object' },
+                },
+            },
         }),
-        ApiUnauthorizedResponse({ description: 'Unauthorized.' }),
+        ApiUnauthorizedResponse({
+            description: 'Unauthorized.',
+            type: ErrorResponseDto,
+        }),
     );
 };

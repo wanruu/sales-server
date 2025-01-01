@@ -18,7 +18,7 @@ import { CreateUserDto } from 'src/dtos/request/user/create-user.dto';
 import { AuthGuard } from 'src/guards/auth.guard';
 import { UpdateUserDto } from 'src/dtos/request/user/update-user.dto';
 import { User } from 'src/decorators/user.decorator';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiExtraModels, ApiTags } from '@nestjs/swagger';
 import {
     CreateOneUserApiResponses,
     DeleteOneUserApiResponses,
@@ -31,6 +31,7 @@ import { LoginResponseDto } from 'src/dtos/response/user/login.response.dto';
 
 @ApiTags('Users')
 @Controller('users')
+@ApiExtraModels(BaseUserDto, LoginResponseDto)
 export class UsersController {
     constructor(private usersService: UsersService) {}
 
@@ -38,43 +39,47 @@ export class UsersController {
     @HttpCode(HttpStatus.OK)
     @UseGuards(AuthGuard)
     @FindOneUserApiResponses()
-    findById(
+    async findById(
         @Param('id', new ParseIntPipe()) id: number,
         @User('id') userId: number,
-    ): Promise<BaseUserDto> {
+    ) {
         if (userId !== id) {
             throw new NotFoundException('User not found.');
         }
-        return this.usersService.findOne({ where: { id } });
+        const data = await this.usersService.findOne({ where: { id } });
+        return { data };
     }
 
     @Post('login')
     @HttpCode(HttpStatus.OK)
     @LoginApiResponses()
-    login(@Body() dto: LoginDto): Promise<LoginResponseDto> {
-        return this.usersService.login(dto);
+    async login(@Body() dto: LoginDto) {
+        const data = await this.usersService.login(dto);
+        return { data };
     }
 
     @Post()
     @HttpCode(HttpStatus.CREATED)
     @CreateOneUserApiResponses()
-    createOne(@Body() dto: CreateUserDto): Promise<BaseUserDto> {
-        return this.usersService.createOne(dto);
+    async createOne(@Body() dto: CreateUserDto) {
+        const data = await this.usersService.createOne(dto);
+        return { data };
     }
 
     @Patch(':id')
     @HttpCode(HttpStatus.OK)
     @UseGuards(AuthGuard)
     @UpdateOneUserApiResponses()
-    updateById(
+    async updateById(
         @Param('id', new ParseIntPipe()) id: number,
         @Body() dto: UpdateUserDto,
         @User('id') userId: number,
-    ): Promise<BaseUserDto> {
+    ) {
         if (userId !== id) {
             throw new NotFoundException('User not found.');
         }
-        return this.usersService.updateOne({ where: { id } }, dto);
+        const data = await this.usersService.updateOne({ where: { id } }, dto);
+        return { data };
     }
 
     @Delete(':id')
@@ -84,7 +89,7 @@ export class UsersController {
     deleteById(
         @Param('id', new ParseIntPipe()) id: number,
         @User('id') userId: number,
-    ): Promise<void> {
+    ) {
         if (userId !== id) {
             throw new NotFoundException('User not found.');
         }

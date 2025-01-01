@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { BaseInvoiceItemDto } from 'src/dtos/common/base-invoice-item.dto';
 import { IdDto, NullableIdDto } from 'src/dtos/common/id.dto';
 
-export class FindManyInvoiceItemDto extends BaseInvoiceItemDto {
+export class FindManyInvoiceResponseItemDto extends BaseInvoiceItemDto {
     @ApiProperty({ type: IdDto })
     product: IdDto;
 
