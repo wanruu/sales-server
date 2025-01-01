@@ -1,12 +1,12 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { UsersModule } from './modules/users.module';
+import { UsersModule } from './modules/users/users.module';
 import { JwtModule } from '@nestjs/jwt';
-import { ProductsModule } from './modules/products.module';
-import { PartnersModule } from './modules/partners.module';
-import { InvoiceItemsModule } from './modules/invoice-items.module';
-import { InvoiceModule } from './modules/invoice.module';
+import { ProductsModule } from './modules/products/products.module';
+import { PartnersModule } from './modules/partners/partners.module';
+import { InvoiceItemsModule } from './modules/invoice-items/invoice-items.module';
+import { InvoiceModule } from './modules/invoices/invoice.module';
 
 @Module({
     imports: [
