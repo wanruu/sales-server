@@ -19,7 +19,7 @@ import { InvoiceModule } from './modules/invoice.module';
         TypeOrmModule.forRoot({
             type: 'postgres',
             host: process.env.DB_HOST,
-            port: 5432,
+            port: parseInt(process.env.DB_PORT),
             autoLoadEntities: true,
             password: process.env.DB_PASSWORD,
             username: process.env.DB_USERNAME,
