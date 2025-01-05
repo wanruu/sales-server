@@ -9,6 +9,7 @@ import {
     ParseIntPipe,
     Patch,
     Post,
+    Query,
     UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from 'src/common/guards/auth.guard';
@@ -18,29 +19,24 @@ import { CreatePartnerDto } from 'src/modules/partners/dtos/partner-request.dtos
 import {
     ApiConflictResponse,
     ApiCreatedResponse,
-    ApiExtraModels,
     ApiNoContentResponse,
     ApiNotFoundResponse,
     ApiOkResponse,
     ApiOperation,
     ApiTags,
-    getSchemaPath,
 } from '@nestjs/swagger';
 import { BasePartnerDto } from 'src/modules/partners/dtos/base-partner.dto';
 import { FindOnePartnerResponseDto } from 'src/modules/partners/dtos/partner-response.dtos';
 import { UpdatePartnerDto } from 'src/modules/partners/dtos/partner-request.dtos';
 import { FindManyPartnerResponseDto } from 'src/modules/partners/dtos/partner-response.dtos';
 import { ApiCommonResponses } from 'src/common/decorators/api-common-responses.decorator';
-import { ErrorResponseDto } from 'src/common/dtos/error-response.dto';
+import { ErrorDto } from 'src/common/dtos/error.dto';
+import { PageOptionsDto } from 'src/common/dtos/page-options.dto';
+import { ApiPaginatedResponse } from 'src/common/decorators/api-paginated-response.decorator';
 
 @ApiTags('Partners')
 @Controller('partners')
 @UseGuards(AuthGuard)
-@ApiExtraModels(
-    BasePartnerDto,
-    FindOnePartnerResponseDto,
-    FindManyPartnerResponseDto,
-)
 export class PartnersController {
     constructor(private partnersService: PartnersService) {}
 
@@ -48,26 +44,14 @@ export class PartnersController {
     @HttpCode(HttpStatus.OK)
     @ApiOperation({ operationId: 'find partners' })
     @ApiCommonResponses()
-    @ApiOkResponse({
-        description: 'Returns all partners.',
-        schema: {
-            properties: {
-                data: {
-                    type: 'array',
-                    items: {
-                        $ref: getSchemaPath(FindManyPartnerResponseDto),
-                    },
-                },
-                meta: { type: 'object' },
-            },
-            required: ['data', 'meta'],
-        },
-    })
-    async findAll(@User('id') userId: number) {
-        const data = await this.partnersService.findMany({
+    @ApiPaginatedResponse(FindManyPartnerResponseDto)
+    findAll(
+        @Query() pageOptionsDto: PageOptionsDto,
+        @User('id') userId: number,
+    ) {
+        return this.partnersService.findMany(pageOptionsDto, {
             where: { user: { id: userId } },
         });
-        return { data };
     }
 
     @Get(':id')
@@ -76,27 +60,19 @@ export class PartnersController {
     @ApiCommonResponses()
     @ApiOkResponse({
         description: 'Returns the partner with the given id.',
-        schema: {
-            properties: {
-                data: {
-                    $ref: getSchemaPath(FindOnePartnerResponseDto),
-                },
-            },
-            required: ['data'],
-        },
+        type: FindOnePartnerResponseDto,
     })
     @ApiNotFoundResponse({
         description: 'Partner not found.',
-        type: ErrorResponseDto,
+        type: ErrorDto,
     })
-    async findById(
+    findById(
         @Param('id', new ParseIntPipe()) id: number,
         @User('id') userId: number,
     ) {
-        const data = await this.partnersService.findOne({
+        return this.partnersService.findOne({
             where: { id, user: { id: userId } },
         });
-        return { data };
     }
 
     @Post()
@@ -105,25 +81,17 @@ export class PartnersController {
     @ApiCommonResponses()
     @ApiCreatedResponse({
         description: 'Returns the created partner.',
-        schema: {
-            properties: {
-                data: {
-                    $ref: getSchemaPath(BasePartnerDto),
-                },
-            },
-            required: ['data'],
-        },
+        type: BasePartnerDto,
     })
     @ApiConflictResponse({
         description: 'Partner already exists.',
-        type: ErrorResponseDto,
+        type: ErrorDto,
     })
-    async createOne(@Body() dto: CreatePartnerDto, @User('id') userId: number) {
-        const data = await this.partnersService.createOne({
+    createOne(@Body() dto: CreatePartnerDto, @User('id') userId: number) {
+        return this.partnersService.createOne({
             ...dto,
             user: { id: userId },
         });
-        return { data };
     }
 
     @Patch(':id')
@@ -132,33 +100,25 @@ export class PartnersController {
     @ApiCommonResponses()
     @ApiOkResponse({
         description: 'Returns the updated partner.',
-        schema: {
-            properties: {
-                data: {
-                    $ref: getSchemaPath(BasePartnerDto),
-                },
-            },
-            required: ['data'],
-        },
+        type: BasePartnerDto,
     })
     @ApiConflictResponse({
         description: 'Partner already exists.',
-        type: ErrorResponseDto,
+        type: ErrorDto,
     })
     @ApiNotFoundResponse({
         description: 'Partner not found.',
-        type: ErrorResponseDto,
+        type: ErrorDto,
     })
-    async updateById(
+    updateById(
         @Param('id', new ParseIntPipe()) id: number,
         @Body() dto: UpdatePartnerDto,
         @User('id') userId: number,
     ) {
-        const data = await this.partnersService.updateOne(
+        return this.partnersService.updateOne(
             { where: { id, user: { id: userId } } },
             dto,
         );
-        return { data };
     }
 
     @Delete(':id')
@@ -171,7 +131,7 @@ export class PartnersController {
     })
     @ApiNotFoundResponse({
         description: 'Partner not found.',
-        type: ErrorResponseDto,
+        type: ErrorDto,
     })
     deleteById(
         @Param('id', new ParseIntPipe()) id: number,

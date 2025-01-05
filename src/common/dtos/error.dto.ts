@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
-export class ErrorResponseDto {
+export class ErrorDto {
     @ApiProperty({
         oneOf: [
             { type: 'array', items: { type: 'string' } },

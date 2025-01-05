@@ -10,6 +10,10 @@ import {
 } from 'typeorm';
 import { BasePartnerDto } from 'src/modules/partners/dtos/base-partner.dto';
 import { UpdatePartnerDto } from 'src/modules/partners/dtos/partner-request.dtos';
+import { plainToInstance } from 'class-transformer';
+import { PageOptionsDto } from 'src/common/dtos/page-options.dto';
+import { PageMetaDto } from 'src/common/dtos/page-meta.dto';
+import { PageDto } from 'src/common/dtos/page.dto';
 
 @Injectable()
 export class PartnersService {
@@ -23,11 +27,24 @@ export class PartnersService {
         if (!partner) {
             throw new NotFoundException('Partner not found.');
         }
-        return partner;
+        return plainToInstance(Partner, partner);
     }
 
-    findMany(options?: FindManyOptions<Partner>): Promise<Partner[]> {
-        return this.partnerRepository.find(options);
+    async findMany(
+        pageOptionsDto: PageOptionsDto,
+        options?: FindManyOptions<Partner>,
+    ): Promise<PageDto<Partner>> {
+        const partners = await this.partnerRepository.find({
+            ...options,
+            order: { createdAt: pageOptionsDto.order },
+            skip: pageOptionsDto.skip,
+            take: pageOptionsDto.take,
+        });
+        const pageMetaDto = new PageMetaDto({
+            itemCount: partners.length,
+            pageOptionsDto,
+        });
+        return new PageDto(plainToInstance(Partner, partners), pageMetaDto);
     }
 
     async createOne(
@@ -35,8 +52,7 @@ export class PartnersService {
     ): Promise<BasePartnerDto> {
         const partner = this.partnerRepository.create(dto);
         const savedPartner = await this.partnerRepository.save(partner);
-        const { user, deletedAt, createdAt, updatedAt, ...rest } = savedPartner;
-        return rest;
+        return plainToInstance(Partner, savedPartner);
     }
 
     async updateOne(
@@ -51,8 +67,7 @@ export class PartnersService {
             ...oldPartner,
             ...dto,
         });
-        const { user, updatedAt, ...rest } = savedPartner;
-        return rest;
+        return plainToInstance(Partner, savedPartner);
     }
 
     async deleteMany(criteria: FindOptionsWhere<Partner>): Promise<void> {

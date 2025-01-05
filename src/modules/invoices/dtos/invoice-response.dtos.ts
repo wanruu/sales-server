@@ -73,7 +73,7 @@ export class FindOneInvoiceResponseDto extends BaseInvoiceDto {
                         ],
                     },
                 },
-                required: ['product'],
+                required: ['product', 'orderItem'],
             },
         ],
     })

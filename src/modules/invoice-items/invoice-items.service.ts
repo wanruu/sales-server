@@ -10,6 +10,10 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateInvoiceItemDto } from 'src/modules/invoice-items/dtos/invoice-item-request.dtos';
 import { BaseInvoiceItemDto } from 'src/modules/invoice-items/dtos/base-invoice-item.dto';
 import { UpdateInvoiceItemDto } from 'src/modules/invoice-items/dtos/invoice-item-request.dtos';
+import { PageOptionsDto } from 'src/common/dtos/page-options.dto';
+import { PageDto } from 'src/common/dtos/page.dto';
+import { PageMetaDto } from 'src/common/dtos/page-meta.dto';
+import { plainToInstance } from 'class-transformer';
 
 @Injectable()
 export class InvoiceItemsService {
@@ -18,16 +22,29 @@ export class InvoiceItemsService {
         private invoiceItemRepository: Repository<InvoiceItem>,
     ) {}
 
-    findMany(options?: FindManyOptions<InvoiceItem>): Promise<InvoiceItem[]> {
-        return this.invoiceItemRepository.find(options);
-    }
-
     async findOne(options: FindOneOptions<InvoiceItem>): Promise<InvoiceItem> {
         const invoiceItem = await this.invoiceItemRepository.findOne(options);
         if (!invoiceItem) {
             throw new NotFoundException('Invoice item not found.');
         }
-        return invoiceItem;
+        return plainToInstance(InvoiceItem, invoiceItem);
+    }
+
+    async findMany(
+        pageOptionsDto: PageOptionsDto,
+        options?: FindManyOptions<InvoiceItem>,
+    ): Promise<PageDto<InvoiceItem>> {
+        const invoiceItems = await this.invoiceItemRepository.find({
+            ...options,
+            order: { createdAt: pageOptionsDto.order },
+            skip: pageOptionsDto.skip,
+            take: pageOptionsDto.take,
+        });
+        const pageMetaDto = new PageMetaDto({
+            itemCount: invoiceItems.length,
+            pageOptionsDto,
+        });
+        return new PageDto(invoiceItems, pageMetaDto);
     }
 
     async createOne(

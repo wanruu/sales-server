@@ -18,14 +18,12 @@ import { User } from 'src/common/decorators/user.decorator';
 import {
     ApiConflictResponse,
     ApiCreatedResponse,
-    ApiExtraModels,
     ApiNoContentResponse,
     ApiNotFoundResponse,
     ApiOkResponse,
     ApiOperation,
     ApiTags,
     ApiUnauthorizedResponse,
-    getSchemaPath,
 } from '@nestjs/swagger';
 import {
     CreateUserDto,
@@ -39,16 +37,10 @@ import {
     UpdateOneUserResponseDto,
 } from 'src/modules/users/dtos/user-response.dtos';
 import { ApiCommonResponses } from 'src/common/decorators/api-common-responses.decorator';
-import { ErrorResponseDto } from 'src/common/dtos/error-response.dto';
+import { ErrorDto } from 'src/common/dtos/error.dto';
 
 @ApiTags('Users')
 @Controller('users')
-@ApiExtraModels(
-    LoginResponseDto,
-    CreateOneUserResponseDto,
-    UpdateOneUserResponseDto,
-    FindOneUserResponseDto,
-)
 export class UsersController {
     constructor(private usersService: UsersService) {}
 
@@ -59,26 +51,20 @@ export class UsersController {
     @ApiCommonResponses()
     @ApiOkResponse({
         description: 'Returns the user with the given id.',
-        schema: {
-            properties: {
-                data: { $ref: getSchemaPath(FindOneUserResponseDto) },
-            },
-            required: ['data'],
-        },
+        type: FindOneUserResponseDto,
     })
     @ApiNotFoundResponse({
         description: 'User not found.',
-        type: ErrorResponseDto,
+        type: ErrorDto,
     })
-    async findById(
+    findById(
         @Param('id', new ParseIntPipe()) id: number,
         @User('id') userId: number,
     ) {
         if (userId !== id) {
             throw new UnauthorizedException('Permission denied.');
         }
-        const data = await this.usersService.findOne({ where: { id } });
-        return { data };
+        return this.usersService.findOne({ where: { id } });
     }
 
     @Post('login')
@@ -87,21 +73,14 @@ export class UsersController {
     @ApiCommonResponses(false)
     @ApiOkResponse({
         description: 'Returns id and JWT token.',
-        schema: {
-            type: 'object',
-            properties: {
-                data: { $ref: getSchemaPath(LoginResponseDto) },
-            },
-            required: ['data'],
-        },
+        type: LoginResponseDto,
     })
     @ApiUnauthorizedResponse({
         description: 'Wrong username or password.',
-        type: ErrorResponseDto,
+        type: ErrorDto,
     })
-    async login(@Body() dto: LoginDto) {
-        const data = await this.usersService.login(dto);
-        return { data };
+    login(@Body() dto: LoginDto) {
+        return this.usersService.login(dto);
     }
 
     @Post()
@@ -110,20 +89,14 @@ export class UsersController {
     @ApiCommonResponses(false)
     @ApiCreatedResponse({
         description: 'Returns the created user.',
-        schema: {
-            properties: {
-                data: { $ref: getSchemaPath(CreateOneUserResponseDto) },
-            },
-            required: ['data'],
-        },
+        type: CreateOneUserResponseDto,
     })
     @ApiConflictResponse({
         description: 'User already exists.',
-        type: ErrorResponseDto,
+        type: ErrorDto,
     })
-    async createOne(@Body() dto: CreateUserDto) {
-        const data = await this.usersService.createOne(dto);
-        return { data };
+    createOne(@Body() dto: CreateUserDto) {
+        return this.usersService.createOne(dto);
     }
 
     @Patch(':id')
@@ -133,22 +106,17 @@ export class UsersController {
     @ApiCommonResponses()
     @ApiOkResponse({
         description: 'Returns the updated user.',
-        schema: {
-            properties: {
-                data: { $ref: getSchemaPath(UpdateOneUserResponseDto) },
-            },
-            required: ['data'],
-        },
+        type: UpdateOneUserResponseDto,
     })
     @ApiConflictResponse({
         description: 'Username conflicts with another user.',
-        type: ErrorResponseDto,
+        type: ErrorDto,
     })
     @ApiNotFoundResponse({
         description: 'User not found.',
-        type: ErrorResponseDto,
+        type: ErrorDto,
     })
-    async updateById(
+    updateById(
         @Param('id', new ParseIntPipe()) id: number,
         @Body() dto: UpdateUserDto,
         @User('id') userId: number,
@@ -156,8 +124,7 @@ export class UsersController {
         if (userId !== id) {
             throw new UnauthorizedException('Permission denied.');
         }
-        const data = await this.usersService.updateOne({ where: { id } }, dto);
-        return { data };
+        return this.usersService.updateOne({ where: { id } }, dto);
     }
 
     @Delete(':id')
@@ -171,7 +138,7 @@ export class UsersController {
     })
     @ApiNotFoundResponse({
         description: 'User not found.',
-        type: ErrorResponseDto,
+        type: ErrorDto,
     })
     deleteById(
         @Param('id', new ParseIntPipe()) id: number,

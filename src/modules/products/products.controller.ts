@@ -9,6 +9,7 @@ import {
     ParseIntPipe,
     Patch,
     Post,
+    Query,
     UseGuards,
 } from '@nestjs/common';
 import { ProductsService } from 'src/modules/products/products.service';
@@ -18,29 +19,24 @@ import { User } from 'src/common/decorators/user.decorator';
 import {
     ApiConflictResponse,
     ApiCreatedResponse,
-    ApiExtraModels,
     ApiNoContentResponse,
     ApiNotFoundResponse,
     ApiOkResponse,
     ApiOperation,
     ApiTags,
-    getSchemaPath,
 } from '@nestjs/swagger';
 import { BaseProductDto } from 'src/modules/products/dtos/base-product.dto';
 import { FindManyProductResponseDto } from 'src/modules/products/dtos/product-response.dtos';
 import { FindOneProductResponseDto } from 'src/modules/products/dtos/product-response.dtos';
 import { UpdateProductDto } from 'src/modules/products/dtos/product-request.dtos';
 import { ApiCommonResponses } from 'src/common/decorators/api-common-responses.decorator';
-import { ErrorResponseDto } from 'src/common/dtos/error-response.dto';
+import { ErrorDto } from 'src/common/dtos/error.dto';
+import { PageOptionsDto } from 'src/common/dtos/page-options.dto';
+import { ApiPaginatedResponse } from 'src/common/decorators/api-paginated-response.decorator';
 
 @ApiTags('Products')
 @Controller('products')
 @UseGuards(AuthGuard)
-@ApiExtraModels(
-    BaseProductDto,
-    FindOneProductResponseDto,
-    FindManyProductResponseDto,
-)
 export class ProductsController {
     constructor(private productsService: ProductsService) {}
 
@@ -48,26 +44,14 @@ export class ProductsController {
     @HttpCode(HttpStatus.OK)
     @ApiOperation({ operationId: 'find products' })
     @ApiCommonResponses()
-    @ApiOkResponse({
-        description: 'Returns all products.',
-        schema: {
-            properties: {
-                data: {
-                    type: 'array',
-                    items: {
-                        $ref: getSchemaPath(FindManyProductResponseDto),
-                    },
-                },
-                meta: { type: 'object' },
-            },
-            required: ['data', 'meta'],
-        },
-    })
-    async findAll(@User('id') userId: number) {
-        const data = await this.productsService.findMany({
+    @ApiPaginatedResponse(FindManyProductResponseDto)
+    findAll(
+        @Query() pageOptionsDto: PageOptionsDto,
+        @User('id') userId: number,
+    ) {
+        return this.productsService.findMany(pageOptionsDto, {
             where: { user: { id: userId } },
         });
-        return { data };
     }
 
     @Get(':id')
@@ -76,27 +60,19 @@ export class ProductsController {
     @ApiCommonResponses()
     @ApiOkResponse({
         description: 'Returns the product with the given id.',
-        schema: {
-            properties: {
-                data: {
-                    $ref: getSchemaPath(FindOneProductResponseDto),
-                },
-            },
-            required: ['data'],
-        },
+        type: FindOneProductResponseDto,
     })
     @ApiNotFoundResponse({
         description: 'Product not found.',
-        type: ErrorResponseDto,
+        type: ErrorDto,
     })
-    async findById(
+    findById(
         @Param('id', new ParseIntPipe()) id: number,
         @User('id') userId: number,
     ) {
-        const data = await this.productsService.findOne({
+        return this.productsService.findOne({
             where: { id, user: { id: userId } },
         });
-        return { data };
     }
 
     @Post()
@@ -105,25 +81,17 @@ export class ProductsController {
     @ApiCommonResponses()
     @ApiCreatedResponse({
         description: 'Returns the created product.',
-        schema: {
-            properties: {
-                data: {
-                    $ref: getSchemaPath(BaseProductDto),
-                },
-            },
-            required: ['data'],
-        },
+        type: BaseProductDto,
     })
     @ApiConflictResponse({
         description: 'Product already exists.',
-        type: ErrorResponseDto,
+        type: ErrorDto,
     })
-    async createOne(@Body() dto: CreateProductDto, @User('id') userId: number) {
-        const data = await this.productsService.createOne({
+    createOne(@Body() dto: CreateProductDto, @User('id') userId: number) {
+        return this.productsService.createOne({
             ...dto,
             user: { id: userId },
         });
-        return { data };
     }
 
     @Patch(':id')
@@ -132,33 +100,25 @@ export class ProductsController {
     @ApiCommonResponses()
     @ApiOkResponse({
         description: 'Returns the updated product.',
-        schema: {
-            properties: {
-                data: {
-                    $ref: getSchemaPath(BaseProductDto),
-                },
-            },
-            required: ['data'],
-        },
+        type: BaseProductDto,
     })
     @ApiConflictResponse({
         description: 'Product already exists.',
-        type: ErrorResponseDto,
+        type: ErrorDto,
     })
     @ApiNotFoundResponse({
         description: 'Product not found.',
-        type: ErrorResponseDto,
+        type: ErrorDto,
     })
-    async updateById(
+    updateById(
         @Param('id', new ParseIntPipe()) id: number,
         @Body() dto: UpdateProductDto,
         @User('id') userId: number,
     ) {
-        const data = await this.productsService.updateOne(
+        return this.productsService.updateOne(
             { where: { id, user: { id: userId } } },
             dto,
         );
-        return { data };
     }
 
     @Delete(':id')
@@ -171,7 +131,7 @@ export class ProductsController {
     })
     @ApiNotFoundResponse({
         description: 'Product not found.',
-        type: ErrorResponseDto,
+        type: ErrorDto,
     })
     deleteById(
         @Param('id', new ParseIntPipe()) id: number,

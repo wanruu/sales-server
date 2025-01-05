@@ -9,7 +9,11 @@ async function bootstrap() {
 
     // class-validator
     app.useGlobalPipes(
-        new ValidationPipe({ forbidUnknownValues: true, whitelist: true }),
+        new ValidationPipe({
+            forbidUnknownValues: true,
+            whitelist: true,
+            transform: true,
+        }),
     );
 
     // swagger

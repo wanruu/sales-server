@@ -22,6 +22,7 @@ import {
     LoginResponseDto,
     UpdateOneUserResponseDto,
 } from 'src/modules/users/dtos/user-response.dtos';
+import { plainToInstance } from 'class-transformer';
 
 @Injectable()
 export class UsersService {
@@ -36,7 +37,7 @@ export class UsersService {
         if (!user) {
             throw new NotFoundException('User not found.');
         }
-        return user;
+        return plainToInstance(User, user);
     }
 
     async createOne(dto: CreateUserDto): Promise<CreateOneUserResponseDto> {
@@ -45,16 +46,12 @@ export class UsersService {
             password: hashSync(dto.password, genSaltSync(10)),
         });
         const savedUser = await this.userRepository.save(user);
-        const { id, name } = savedUser;
-        return { id, name };
+        return plainToInstance(User, savedUser);
     }
 
     async login(dto: LoginDto): Promise<LoginResponseDto> {
         const { name, password } = dto;
-        const user = await this.userRepository.findOne({
-            where: { name },
-            select: ['id', 'name', 'password'],
-        });
+        const user = await this.userRepository.findOne({ where: { name } });
         if (!user || !compareSync(password, user.password)) {
             throw new UnauthorizedException('Incorrect username or password.');
         }
@@ -79,8 +76,7 @@ export class UsersService {
             ...oldUser,
             ...dto,
         });
-        const { id, name } = savedUser;
-        return { id, name };
+        return plainToInstance(User, savedUser);
     }
 
     async deleteMany(criteria: FindOptionsWhere<User>): Promise<void> {

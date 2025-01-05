@@ -9,6 +9,7 @@ import {
     ParseIntPipe,
     Patch,
     Post,
+    Query,
     UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from 'src/common/guards/auth.guard';
@@ -16,13 +17,11 @@ import { InvoiceItemsService } from 'src/modules/invoice-items/invoice-items.ser
 import { User } from 'src/common/decorators/user.decorator';
 import {
     ApiCreatedResponse,
-    ApiExtraModels,
     ApiNoContentResponse,
     ApiNotFoundResponse,
     ApiOkResponse,
     ApiOperation,
     ApiTags,
-    getSchemaPath,
 } from '@nestjs/swagger';
 import {
     CreateInvoiceItemDto,
@@ -34,16 +33,13 @@ import {
     FindManyInvoiceItemResponseDto,
 } from 'src/modules/invoice-items/dtos/invoice-item-response.dtos';
 import { ApiCommonResponses } from 'src/common/decorators/api-common-responses.decorator';
-import { ErrorResponseDto } from 'src/common/dtos/error-response.dto';
+import { ErrorDto } from 'src/common/dtos/error.dto';
+import { PageOptionsDto } from 'src/common/dtos/page-options.dto';
+import { ApiPaginatedResponse } from 'src/common/decorators/api-paginated-response.decorator';
 
 @ApiTags('InvoiceItems')
 @Controller('invoiceItems')
 @UseGuards(AuthGuard)
-@ApiExtraModels(
-    BaseInvoiceItemDto,
-    FindOneInvoiceItemResponseDto,
-    FindManyInvoiceItemResponseDto,
-)
 export class InvoiceItemsController {
     constructor(private invoiceItemsService: InvoiceItemsService) {}
 
@@ -51,23 +47,12 @@ export class InvoiceItemsController {
     @HttpCode(HttpStatus.OK)
     @ApiOperation({ operationId: 'find invoice items' })
     @ApiCommonResponses()
-    @ApiOkResponse({
-        description: 'Returns all invoice items.',
-        schema: {
-            properties: {
-                data: {
-                    type: 'array',
-                    items: {
-                        $ref: getSchemaPath(FindManyInvoiceItemResponseDto),
-                    },
-                },
-                meta: { type: 'object' },
-            },
-            required: ['data', 'meta'],
-        },
-    })
-    async findAll(@User('id') userId: number) {
-        const data = await this.invoiceItemsService.findMany({
+    @ApiPaginatedResponse(FindManyInvoiceItemResponseDto)
+    findAll(
+        @Query() pageOptionsDto: PageOptionsDto,
+        @User('id') userId: number,
+    ) {
+        return this.invoiceItemsService.findMany(pageOptionsDto, {
             where: { user: { id: userId } },
             relations: ['orderItem'],
             select: {
@@ -78,7 +63,6 @@ export class InvoiceItemsController {
                 disableMixedMap: true,
             },
         });
-        return { data };
     }
 
     @Get(':id')
@@ -87,27 +71,19 @@ export class InvoiceItemsController {
     @ApiCommonResponses()
     @ApiOkResponse({
         description: 'Returns the invoice item with the given id.',
-        schema: {
-            properties: {
-                data: {
-                    $ref: getSchemaPath(FindOneInvoiceItemResponseDto),
-                },
-            },
-            required: ['data'],
-        },
+        type: FindOneInvoiceItemResponseDto,
     })
     @ApiNotFoundResponse({
         description: 'Invoice item not found.',
-        type: ErrorResponseDto,
+        type: ErrorDto,
     })
-    async findById(
+    findById(
         @Param('id', new ParseIntPipe()) id: number,
         @User('id') userId: number,
     ) {
-        const data = await this.invoiceItemsService.findOne({
+        return this.invoiceItemsService.findOne({
             where: { id, user: { id: userId } },
         });
-        return { data };
     }
 
     @Post()
@@ -116,26 +92,17 @@ export class InvoiceItemsController {
     @ApiCommonResponses()
     @ApiCreatedResponse({
         description: 'Returns the created invoice item.',
-        schema: {
-            properties: {
-                data: { $ref: getSchemaPath(BaseInvoiceItemDto) },
-            },
-            required: ['data'],
-        },
+        type: BaseInvoiceItemDto,
     })
     @ApiNotFoundResponse({
         description: 'Product not found.',
-        type: ErrorResponseDto,
+        type: ErrorDto,
     })
-    async createOne(
-        @Body() dto: CreateInvoiceItemDto,
-        @User('id') userId: number,
-    ) {
-        const data = await this.invoiceItemsService.createOne({
+    createOne(@Body() dto: CreateInvoiceItemDto, @User('id') userId: number) {
+        return this.invoiceItemsService.createOne({
             ...dto,
             user: { id: userId },
         });
-        return { data };
     }
 
     @Patch(':id')
@@ -144,26 +111,17 @@ export class InvoiceItemsController {
     @ApiCommonResponses()
     @ApiOkResponse({
         description: 'Returns the updated invoice item.',
-        schema: {
-            properties: {
-                data: { $ref: getSchemaPath(BaseInvoiceItemDto) },
-            },
-            required: ['data'],
-        },
+        type: BaseInvoiceItemDto,
     })
     @ApiNotFoundResponse({
         description: 'Invoice item or product not found.',
-        type: ErrorResponseDto,
+        type: ErrorDto,
     })
-    async updateById(
+    updateById(
         @Param('id', new ParseIntPipe()) id: number,
         @Body() dto: UpdateInvoiceItemDto,
     ) {
-        const data = await this.invoiceItemsService.updateOne(
-            { where: { id } },
-            dto,
-        );
-        return { data };
+        return this.invoiceItemsService.updateOne({ where: { id } }, dto);
     }
 
     @Delete(':id')
@@ -176,7 +134,7 @@ export class InvoiceItemsController {
     })
     @ApiNotFoundResponse({
         description: 'Invoice item not found.',
-        type: ErrorResponseDto,
+        type: ErrorDto,
     })
     deleteById(
         @Param('id', new ParseIntPipe()) id: number,

@@ -5,17 +5,17 @@ import {
     ApiInternalServerErrorResponse,
     ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { ErrorResponseDto } from 'src/common/dtos/error-response.dto';
+import { ErrorDto } from 'src/common/dtos/error.dto';
 
 export const ApiCommonResponses = (auth: boolean = true) => {
     const decorator = applyDecorators(
         ApiInternalServerErrorResponse({
             description: 'Internal server error.',
-            type: ErrorResponseDto,
+            type: ErrorDto,
         }),
         ApiBadRequestResponse({
             description: 'Bad request.',
-            type: ErrorResponseDto,
+            type: ErrorDto,
         }),
     );
     if (auth) {
@@ -24,7 +24,7 @@ export const ApiCommonResponses = (auth: boolean = true) => {
             ApiBearerAuth(),
             ApiUnauthorizedResponse({
                 description: 'Unauthorized.',
-                type: ErrorResponseDto,
+                type: ErrorDto,
             }),
         );
     }

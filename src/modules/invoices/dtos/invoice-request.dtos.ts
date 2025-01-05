@@ -14,7 +14,6 @@ import {
     IsInt,
     IsArray,
     IsDateString,
-    ValidateIf,
 } from 'class-validator';
 import { IdDto } from 'src/common/dtos/id.dto';
 import { BaseInvoiceItemDto } from 'src/modules/invoice-items/dtos/base-invoice-item.dto';

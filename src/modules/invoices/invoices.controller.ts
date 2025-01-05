@@ -1,5 +1,4 @@
 import {
-    ArgumentMetadata,
     BadRequestException,
     Body,
     Controller,
@@ -12,19 +11,17 @@ import {
     PipeTransform,
     Post,
     Put,
+    Query,
     UseGuards,
 } from '@nestjs/common';
 import {
-    ApiBearerAuth,
     ApiConflictResponse,
     ApiCreatedResponse,
-    ApiExtraModels,
     ApiNoContentResponse,
     ApiNotFoundResponse,
     ApiOkResponse,
     ApiOperation,
     ApiTags,
-    getSchemaPath,
 } from '@nestjs/swagger';
 import { User } from 'src/common/decorators/user.decorator';
 import {
@@ -39,14 +36,14 @@ import {
 import { AuthGuard } from 'src/common/guards/auth.guard';
 import { InvoicesService } from 'src/modules/invoices/invoices.service';
 import { ApiCommonResponses } from 'src/common/decorators/api-common-responses.decorator';
-import { ErrorResponseDto } from 'src/common/dtos/error-response.dto';
+import { ErrorDto } from 'src/common/dtos/error.dto';
 import { isOrderType } from 'src/common/constants/invoice.constants';
+import { PageOptionsDto } from 'src/common/dtos/page-options.dto';
+import { ApiPaginatedResponse } from 'src/common/decorators/api-paginated-response.decorator';
+import { Order } from 'src/common/constants/page.constants';
 
 class InvoicePipeTransform implements PipeTransform {
-    transform(
-        value: CreateInvoiceDto | ReplaceInvoiceDto,
-        metadata: ArgumentMetadata,
-    ) {
+    transform(value: CreateInvoiceDto | ReplaceInvoiceDto) {
         const messages: string[] = [];
         if (isOrderType(value.type)) {
             if (value.order) {
@@ -84,15 +81,9 @@ class InvoicePipeTransform implements PipeTransform {
     }
 }
 
-@ApiBearerAuth()
 @ApiTags('Invoices')
 @UseGuards(AuthGuard)
 @Controller('invoices')
-@ApiExtraModels(
-    CreateOneInvoiceResponseDto,
-    FindOneInvoiceResponseDto,
-    FindManyInvoiceResponseDto,
-)
 export class InvoicesController {
     constructor(private invoicesService: InvoicesService) {}
 
@@ -100,23 +91,12 @@ export class InvoicesController {
     @HttpCode(HttpStatus.OK)
     @ApiOperation({ operationId: 'find invoices' })
     @ApiCommonResponses()
-    @ApiOkResponse({
-        description: 'Returns all invoices.',
-        schema: {
-            properties: {
-                data: {
-                    type: 'array',
-                    items: {
-                        $ref: getSchemaPath(FindManyInvoiceResponseDto),
-                    },
-                },
-                meta: { type: 'object' },
-            },
-            required: ['data', 'meta'],
-        },
-    })
-    async findAll(@User('id') userId: number) {
-        const data = await this.invoicesService.findMany({
+    @ApiPaginatedResponse(FindManyInvoiceResponseDto)
+    findAll(
+        @Query() pageOptionsDto: PageOptionsDto,
+        @User('id') userId: number,
+    ) {
+        return this.invoicesService.findMany(pageOptionsDto, {
             where: { user: { id: userId } },
             relations: { order: true },
             select: {
@@ -127,7 +107,6 @@ export class InvoicesController {
                 disableMixedMap: true,
             },
         });
-        return { data };
     }
 
     @Get(':id')
@@ -136,24 +115,17 @@ export class InvoicesController {
     @ApiCommonResponses()
     @ApiOkResponse({
         description: 'Returns the invoice with the given id.',
-        schema: {
-            properties: {
-                data: {
-                    $ref: getSchemaPath(FindOneInvoiceResponseDto),
-                },
-            },
-            required: ['data'],
-        },
+        type: FindOneInvoiceResponseDto,
     })
     @ApiNotFoundResponse({
         description: 'Invoice not found.',
-        type: ErrorResponseDto,
+        type: ErrorDto,
     })
-    async findById(
+    findById(
         @Param('id', new ParseIntPipe()) id: number,
         @User('id') userId: number,
     ) {
-        const data = await this.invoicesService.findOne({
+        return this.invoicesService.findOne({
             where: { id, user: { id: userId } },
             relations: {
                 partner: true,
@@ -175,9 +147,8 @@ export class InvoicesController {
                     orderItem: { id: true },
                 },
             },
-            order: { invoiceItems: { id: 'ASC' } },
+            order: { invoiceItems: { id: Order.ASC } },
         });
-        return { data };
     }
 
     @Post()
@@ -186,32 +157,24 @@ export class InvoicesController {
     @ApiCommonResponses()
     @ApiCreatedResponse({
         description: 'Returns the created invoice.',
-        schema: {
-            properties: {
-                data: {
-                    $ref: getSchemaPath(CreateOneInvoiceResponseDto),
-                },
-            },
-            required: ['data'],
-        },
+        type: CreateOneInvoiceResponseDto,
     })
     @ApiConflictResponse({
         description: 'Invoice already exists.',
-        type: ErrorResponseDto,
+        type: ErrorDto,
     })
     @ApiNotFoundResponse({
         description: 'Partner, product, order or order item not found.',
-        type: ErrorResponseDto,
+        type: ErrorDto,
     })
-    async createOne(
+    createOne(
         @Body(new InvoicePipeTransform()) dto: CreateInvoiceDto,
         @User('id') userId: number,
     ) {
-        const data = await this.invoicesService.createOne({
+        return this.invoicesService.createOne({
             ...dto,
             user: { id: userId },
         });
-        return { data };
     }
 
     @Put(':id')
@@ -220,33 +183,25 @@ export class InvoicesController {
     @ApiCommonResponses()
     @ApiOkResponse({
         description: 'Returns the replaced invoice.',
-        schema: {
-            properties: {
-                data: {
-                    $ref: getSchemaPath(CreateOneInvoiceResponseDto),
-                },
-            },
-            required: ['data'],
-        },
+        type: CreateOneInvoiceResponseDto,
     })
     @ApiConflictResponse({
         description: 'Invoice already exists.',
-        type: ErrorResponseDto,
+        type: ErrorDto,
     })
     @ApiNotFoundResponse({
         description: 'Partner, product, invoice or order item not found.',
-        type: ErrorResponseDto,
+        type: ErrorDto,
     })
-    async updateById(
+    updateById(
         @Param('id', new ParseIntPipe()) id: number,
         @Body() dto: ReplaceInvoiceDto,
         @User('id') userId: number,
     ) {
-        const data = await this.invoicesService.replaceOne(
+        return this.invoicesService.replaceOne(
             { where: { id, user: { id: userId } } },
             { ...dto, user: { id: userId } },
         );
-        return { data };
     }
 
     @Delete(':id')
@@ -259,7 +214,7 @@ export class InvoicesController {
     })
     @ApiNotFoundResponse({
         description: 'Invoice not found.',
-        type: ErrorResponseDto,
+        type: ErrorDto,
     })
     deleteById(
         @Param('id', new ParseIntPipe()) id: number,

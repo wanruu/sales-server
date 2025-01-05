@@ -10,6 +10,10 @@ import {
 } from 'typeorm';
 import { BaseProductDto } from 'src/modules/products/dtos/base-product.dto';
 import { UpdateProductDto } from 'src/modules/products/dtos/product-request.dtos';
+import { plainToInstance } from 'class-transformer';
+import { PageOptionsDto } from 'src/common/dtos/page-options.dto';
+import { PageMetaDto } from 'src/common/dtos/page-meta.dto';
+import { PageDto } from 'src/common/dtos/page.dto';
 
 @Injectable()
 export class ProductsService {
@@ -23,11 +27,24 @@ export class ProductsService {
         if (!product) {
             throw new NotFoundException('Product not found.');
         }
-        return product;
+        return plainToInstance(Product, product);
     }
 
-    findMany(options?: FindManyOptions<Product>): Promise<Product[]> {
-        return this.productRepository.find(options);
+    async findMany(
+        pageOptionsDto: PageOptionsDto,
+        options?: FindManyOptions<Product>,
+    ): Promise<PageDto<Product>> {
+        const products = await this.productRepository.find({
+            ...options,
+            order: { name: pageOptionsDto.order },
+            skip: pageOptionsDto.skip,
+            take: pageOptionsDto.take,
+        });
+        const pageMetaDto = new PageMetaDto({
+            itemCount: products.length,
+            pageOptionsDto,
+        });
+        return new PageDto(plainToInstance(Product, products), pageMetaDto);
     }
 
     async createOne(
@@ -35,8 +52,7 @@ export class ProductsService {
     ): Promise<BaseProductDto> {
         const product = this.productRepository.create(dto);
         const savedProduct = await this.productRepository.save(product);
-        const { user, deletedAt, updatedAt, createdAt, ...rest } = savedProduct;
-        return rest;
+        return plainToInstance(Product, savedProduct);
     }
 
     async updateOne(
@@ -47,13 +63,11 @@ export class ProductsService {
         if (!oldProduct) {
             throw new NotFoundException('Product not found.');
         }
-
         const savedProduct = await this.productRepository.save({
             ...oldProduct,
             ...dto,
         });
-        const { user, updatedAt, ...rest } = savedProduct;
-        return rest;
+        return plainToInstance(Product, savedProduct);
     }
 
     async deleteMany(criteria: FindOptionsWhere<Product>): Promise<void> {
