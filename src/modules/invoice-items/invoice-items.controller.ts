@@ -25,13 +25,11 @@ import {
 } from '@nestjs/swagger';
 import {
     CreateInvoiceItemDto,
+    InvoiceItemFilterOptionsDto,
     UpdateInvoiceItemDto,
 } from 'src/modules/invoice-items/dtos/invoice-item-request.dtos';
 import { BaseInvoiceItemDto } from 'src/modules/invoice-items/dtos/base-invoice-item.dto';
-import {
-    FindOneInvoiceItemResponseDto,
-    FindManyInvoiceItemResponseDto,
-} from 'src/modules/invoice-items/dtos/invoice-item-response.dtos';
+import { FindManyInvoiceItemResponseDto } from 'src/modules/invoice-items/dtos/invoice-item-response.dtos';
 import { ApiCommonResponses } from 'src/common/decorators/api-common-responses.decorator';
 import { ErrorDto } from 'src/common/dtos/error.dto';
 import { PageOptionsDto } from 'src/common/dtos/page-options.dto';
@@ -50,40 +48,14 @@ export class InvoiceItemsController {
     @ApiPaginatedResponse(FindManyInvoiceItemResponseDto)
     findAll(
         @Query() pageOptionsDto: PageOptionsDto,
+        @Query() filterOptionsDto: InvoiceItemFilterOptionsDto,
         @User('id') userId: number,
     ) {
-        return this.invoiceItemsService.findMany(pageOptionsDto, {
-            where: { user: { id: userId } },
-            relations: ['orderItem'],
-            select: {
-                orderItem: { id: true },
-            },
-            loadRelationIds: {
-                relations: ['product', 'invoice'],
-                disableMixedMap: true,
-            },
-        });
-    }
-
-    @Get(':id')
-    @HttpCode(HttpStatus.OK)
-    @ApiOperation({ operationId: 'find an invoice item' })
-    @ApiCommonResponses()
-    @ApiOkResponse({
-        description: 'Returns the invoice item with the given id.',
-        type: FindOneInvoiceItemResponseDto,
-    })
-    @ApiNotFoundResponse({
-        description: 'Invoice item not found.',
-        type: ErrorDto,
-    })
-    findById(
-        @Param('id', new ParseIntPipe()) id: number,
-        @User('id') userId: number,
-    ) {
-        return this.invoiceItemsService.findOne({
-            where: { id, user: { id: userId } },
-        });
+        const where = { user: { id: userId } };
+        if (filterOptionsDto.productId) {
+            where['product'] = { id: filterOptionsDto.productId };
+        }
+        return this.invoiceItemsService.findMany(where, pageOptionsDto);
     }
 
     @Post()
@@ -121,7 +93,7 @@ export class InvoiceItemsController {
         @Param('id', new ParseIntPipe()) id: number,
         @Body() dto: UpdateInvoiceItemDto,
     ) {
-        return this.invoiceItemsService.updateOne({ where: { id } }, dto);
+        return this.invoiceItemsService.updateOne({ id }, dto);
     }
 
     @Delete(':id')

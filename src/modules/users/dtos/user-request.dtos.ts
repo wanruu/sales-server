@@ -8,7 +8,4 @@ export class CreateUserDto extends PickType(BaseUserDto, [
 
 export class UpdateUserDto extends PartialType(CreateUserDto) {}
 
-export class LoginDto extends PickType(BaseUserDto, [
-    'name',
-    'password',
-] as const) {}
+export class LoginDto extends CreateUserDto {}

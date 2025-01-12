@@ -49,9 +49,8 @@ export class ProductsController {
         @Query() pageOptionsDto: PageOptionsDto,
         @User('id') userId: number,
     ) {
-        return this.productsService.findMany(pageOptionsDto, {
-            where: { user: { id: userId } },
-        });
+        const where = { user: { id: userId } };
+        return this.productsService.findMany(where, pageOptionsDto);
     }
 
     @Get(':id')
@@ -70,9 +69,8 @@ export class ProductsController {
         @Param('id', new ParseIntPipe()) id: number,
         @User('id') userId: number,
     ) {
-        return this.productsService.findOne({
-            where: { id, user: { id: userId } },
-        });
+        const where = { user: { id: userId } };
+        return this.productsService.findOne(where);
     }
 
     @Post()
@@ -115,10 +113,8 @@ export class ProductsController {
         @Body() dto: UpdateProductDto,
         @User('id') userId: number,
     ) {
-        return this.productsService.updateOne(
-            { where: { id, user: { id: userId } } },
-            dto,
-        );
+        const where = { id, user: { id: userId } };
+        return this.productsService.updateOne(where, dto);
     }
 
     @Delete(':id')

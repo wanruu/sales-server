@@ -1,89 +1,67 @@
-import { ApiExtraModels, ApiProperty, getSchemaPath } from '@nestjs/swagger';
-import { IdDto } from 'src/common/dtos/id.dto';
-import { BaseInvoiceDto } from './base-invoice.dto';
-import { BaseInvoiceItemDto } from 'src/modules/invoice-items/dtos/base-invoice-item.dto';
-import { BasePartnerDto } from 'src/modules/partners/dtos/base-partner.dto';
-import { BaseProductDto } from 'src/modules/products/dtos/base-product.dto';
+import {
+    ApiExtraModels,
+    ApiProperty,
+    getSchemaPath,
+    OmitType,
+} from '@nestjs/swagger';
+import { BaseInvoiceDto, BaseInvoiceWithPartnerDto } from './base-invoice.dto';
+import { BaseInvoiceItemInInvoiceDto } from 'src/modules/invoice-items/dtos/base-invoice-item.dto';
+import { Expose, Type } from 'class-transformer';
 
-export class CreateOneInvoiceResponseDto extends BaseInvoiceDto {
+class FindManyInvoiceResponse__RelatedInvoiceDto extends OmitType(
+    BaseInvoiceDto,
+    ['partner', 'order'] as const,
+) {}
+
+@ApiExtraModels(FindManyInvoiceResponse__RelatedInvoiceDto)
+export class FindManyInvoiceResponseDto extends OmitType(
+    BaseInvoiceWithPartnerDto,
+    ['order'] as const,
+) {
     @ApiProperty({
-        type: 'array',
-        items: {
-            type: 'object',
-            properties: {
-                id: { type: 'number' },
-                product: { $ref: getSchemaPath(IdDto) },
-                orderItem: {
-                    oneOf: [{ $ref: getSchemaPath(IdDto) }, { type: 'null' }],
-                },
-            },
-            required: ['id', 'product', 'orderItem'],
-        },
-    })
-    invoiceItems: {
-        id: number;
-        product: IdDto;
-        orderItem: { id: number } | null;
-    }[];
-
-    @ApiProperty({ type: IdDto })
-    partner: IdDto;
-
-    @ApiProperty({ oneOf: [{ $ref: getSchemaPath(IdDto) }, { type: 'null' }] })
-    order: { id: number } | null;
-}
-
-export class FindManyInvoiceResponseDto extends BaseInvoiceDto {
-    @ApiProperty({ type: IdDto })
-    partner: IdDto;
-
-    @ApiProperty({ oneOf: [{ $ref: getSchemaPath(IdDto) }, { type: 'null' }] })
-    order: { id: number } | null;
-}
-
-class FindOneInvoiceResponse__RelatedInvoiceDto extends BaseInvoiceDto {
-    @ApiProperty({
-        isArray: true,
-        allOf: [
-            { $ref: getSchemaPath(BaseInvoiceItemDto) },
-            {
-                properties: {
-                    product: { $ref: getSchemaPath(BaseProductDto) },
-                },
-                required: ['product'],
-            },
+        oneOf: [
+            { type: 'null' },
+            { $ref: getSchemaPath(FindManyInvoiceResponse__RelatedInvoiceDto) },
         ],
     })
-    invoiceItems: (BaseInvoiceItemDto & { product: BaseProductDto })[];
+    @Type(() => FindManyInvoiceResponse__RelatedInvoiceDto)
+    @Expose()
+    order: EntityType<FindManyInvoiceResponse__RelatedInvoiceDto> | null;
+
+    @ApiProperty({
+        oneOf: [
+            { type: 'null' },
+            { $ref: getSchemaPath(FindManyInvoiceResponse__RelatedInvoiceDto) },
+        ],
+    })
+    @Type(() => FindManyInvoiceResponse__RelatedInvoiceDto)
+    @Expose()
+    refund: EntityType<FindManyInvoiceResponse__RelatedInvoiceDto> | null;
+}
+
+@ApiExtraModels(BaseInvoiceItemInInvoiceDto)
+class FindOneInvoiceResponse__RelatedInvoiceDto extends OmitType(
+    BaseInvoiceDto,
+    ['partner', 'order'] as const,
+) {
+    @ApiProperty({
+        isArray: true,
+        type: BaseInvoiceItemInInvoiceDto,
+    })
+    @Type(() => BaseInvoiceItemInInvoiceDto)
+    @Expose()
+    invoiceItems: BaseInvoiceItemInInvoiceDto[];
 }
 
 @ApiExtraModels(FindOneInvoiceResponse__RelatedInvoiceDto)
-export class FindOneInvoiceResponseDto extends BaseInvoiceDto {
-    @ApiProperty({
-        isArray: true,
-        allOf: [
-            { $ref: getSchemaPath(BaseInvoiceItemDto) },
-            {
-                properties: {
-                    product: { $ref: getSchemaPath(BaseProductDto) },
-                    orderItem: {
-                        oneOf: [
-                            { $ref: getSchemaPath(IdDto) },
-                            { type: 'null' },
-                        ],
-                    },
-                },
-                required: ['product', 'orderItem'],
-            },
-        ],
-    })
-    invoiceItems: (BaseInvoiceItemDto & {
-        product: BaseProductDto;
-        orderItem: { id: number } | null;
-    })[];
-
-    @ApiProperty({ type: BasePartnerDto })
-    partner: BasePartnerDto;
+export class FindOneInvoiceResponseDto extends OmitType(
+    BaseInvoiceWithPartnerDto,
+    ['order'] as const,
+) {
+    @ApiProperty({ isArray: true, type: BaseInvoiceItemInInvoiceDto })
+    @Type(() => BaseInvoiceItemInInvoiceDto)
+    @Expose()
+    invoiceItems: BaseInvoiceItemInInvoiceDto[];
 
     @ApiProperty({
         oneOf: [
@@ -91,13 +69,9 @@ export class FindOneInvoiceResponseDto extends BaseInvoiceDto {
             { $ref: getSchemaPath(FindOneInvoiceResponse__RelatedInvoiceDto) },
         ],
     })
-    order?:
-        | (BaseInvoiceDto & {
-              invoiceItems: (BaseInvoiceItemDto & {
-                  product: BaseProductDto;
-              })[];
-          })
-        | null;
+    @Type(() => FindOneInvoiceResponse__RelatedInvoiceDto)
+    @Expose()
+    order: EntityType<FindOneInvoiceResponse__RelatedInvoiceDto> | null;
 
     @ApiProperty({
         oneOf: [
@@ -105,11 +79,7 @@ export class FindOneInvoiceResponseDto extends BaseInvoiceDto {
             { $ref: getSchemaPath(FindOneInvoiceResponse__RelatedInvoiceDto) },
         ],
     })
-    refund:
-        | (BaseInvoiceDto & {
-              invoiceItems: (BaseInvoiceItemDto & {
-                  product: BaseProductDto;
-              })[];
-          })
-        | null;
+    @Type(() => FindOneInvoiceResponse__RelatedInvoiceDto)
+    @Expose()
+    refund: EntityType<FindOneInvoiceResponse__RelatedInvoiceDto> | null;
 }

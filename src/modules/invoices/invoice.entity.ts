@@ -11,7 +11,6 @@ import { Partner } from 'src/modules/partners/partner.entity';
 import { User } from 'src/modules/users/user.entity';
 import { InvoiceItem } from 'src/modules/invoice-items/invoice-item.entity';
 import { BaseEntity } from 'src/common/entities/base.entity';
-import { DecimalColumnTransformer } from 'src/common/transformers/decimal-column.transformer';
 import {
     DeliveryStatus,
     InvoiceType,
@@ -27,23 +26,14 @@ export class Invoice extends BaseEntity {
     @Column('enum', { enum: InvoiceType })
     type: InvoiceType;
 
-    @Column('decimal', {
-        default: 0,
-        transformer: new DecimalColumnTransformer(),
-    })
-    amount: number;
+    @Column('decimal', { default: '0' })
+    amount: string;
 
-    @Column('decimal', {
-        default: 0,
-        transformer: new DecimalColumnTransformer(),
-    })
-    prepayment: number;
+    @Column('decimal', { default: '0' })
+    prepayment: string;
 
-    @Column('decimal', {
-        default: 0,
-        transformer: new DecimalColumnTransformer(),
-    })
-    payment: number;
+    @Column('decimal', { default: '0' })
+    payment: string;
 
     @Column('enum', {
         enum: DeliveryStatus,

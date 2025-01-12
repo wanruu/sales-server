@@ -1,11 +1,6 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { InvoiceItem } from 'src/modules/invoice-items/invoice-item.entity';
-import {
-    type FindManyOptions,
-    type FindOneOptions,
-    type FindOptionsWhere,
-    Repository,
-} from 'typeorm';
+import { type FindOptionsWhere, Repository } from 'typeorm';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateInvoiceItemDto } from 'src/modules/invoice-items/dtos/invoice-item-request.dtos';
 import { BaseInvoiceItemDto } from 'src/modules/invoice-items/dtos/base-invoice-item.dto';
@@ -14,6 +9,7 @@ import { PageOptionsDto } from 'src/common/dtos/page-options.dto';
 import { PageDto } from 'src/common/dtos/page.dto';
 import { PageMetaDto } from 'src/common/dtos/page-meta.dto';
 import { plainToInstance } from 'class-transformer';
+import { FindManyInvoiceItemResponseDto } from './dtos/invoice-item-response.dtos';
 
 @Injectable()
 export class InvoiceItemsService {
@@ -22,20 +18,18 @@ export class InvoiceItemsService {
         private invoiceItemRepository: Repository<InvoiceItem>,
     ) {}
 
-    async findOne(options: FindOneOptions<InvoiceItem>): Promise<InvoiceItem> {
-        const invoiceItem = await this.invoiceItemRepository.findOne(options);
-        if (!invoiceItem) {
-            throw new NotFoundException('Invoice item not found.');
-        }
-        return plainToInstance(InvoiceItem, invoiceItem);
-    }
-
     async findMany(
+        where: FindOptionsWhere<InvoiceItem>,
         pageOptionsDto: PageOptionsDto,
-        options?: FindManyOptions<InvoiceItem>,
-    ): Promise<PageDto<InvoiceItem>> {
+    ): Promise<PageDto<FindManyInvoiceItemResponseDto>> {
         const invoiceItems = await this.invoiceItemRepository.find({
-            ...options,
+            where,
+            relations: {
+                orderItem: true,
+                refundItem: true,
+                product: true,
+                invoice: { partner: true },
+            },
             order: { createdAt: pageOptionsDto.order },
             skip: pageOptionsDto.skip,
             take: pageOptionsDto.take,
@@ -44,7 +38,12 @@ export class InvoiceItemsService {
             itemCount: invoiceItems.length,
             pageOptionsDto,
         });
-        return new PageDto(invoiceItems, pageMetaDto);
+        return new PageDto(
+            plainToInstance(FindManyInvoiceItemResponseDto, invoiceItems, {
+                excludeExtraneousValues: true,
+            }),
+            pageMetaDto,
+        );
     }
 
     async createOne(
@@ -53,30 +52,37 @@ export class InvoiceItemsService {
         const invoiceItem = this.invoiceItemRepository.create(dto);
         const savedInvoiceItem =
             await this.invoiceItemRepository.save(invoiceItem);
-        const { user, deletedAt, createdAt, updatedAt, ...rest } =
-            savedInvoiceItem;
-        return rest;
+        return plainToInstance(BaseInvoiceItemDto, savedInvoiceItem, {
+            excludeExtraneousValues: true,
+        });
     }
 
     async updateOne(
-        options: FindOneOptions<InvoiceItem>,
+        where: FindOptionsWhere<InvoiceItem>,
         dto: UpdateInvoiceItemDto,
     ): Promise<BaseInvoiceItemDto> {
-        const oldInvoiceItem =
-            await this.invoiceItemRepository.findOne(options);
+        const oldInvoiceItem = await this.invoiceItemRepository.findOne({
+            where,
+            loadRelationIds: { relations: ['product'], disableMixedMap: true },
+        });
         if (!oldInvoiceItem) {
             throw new NotFoundException('Invoice item not found.');
         }
-        const savedInvoiceItem = await this.invoiceItemRepository.save({
-            ...oldInvoiceItem,
-            ...dto,
+
+        const newInvoiceItem = { ...oldInvoiceItem };
+        Object.entries(dto).forEach(([key, value]) => {
+            if (value !== undefined) newInvoiceItem[key] = value;
         });
-        const { user, updatedAt, ...rest } = savedInvoiceItem;
-        return rest;
+
+        const savedInvoiceItem =
+            await this.invoiceItemRepository.save(newInvoiceItem);
+        return plainToInstance(BaseInvoiceItemDto, savedInvoiceItem, {
+            excludeExtraneousValues: true,
+        });
     }
 
-    async deleteMany(criteria: FindOptionsWhere<InvoiceItem>): Promise<void> {
-        const deleteResult = await this.invoiceItemRepository.delete(criteria);
+    async deleteMany(where: FindOptionsWhere<InvoiceItem>): Promise<void> {
+        const deleteResult = await this.invoiceItemRepository.delete(where);
         if (deleteResult.affected === 0) {
             throw new NotFoundException('Invoice item not found.');
         }

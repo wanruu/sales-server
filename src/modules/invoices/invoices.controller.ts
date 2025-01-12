@@ -26,10 +26,10 @@ import {
 import { User } from 'src/common/decorators/user.decorator';
 import {
     CreateInvoiceDto,
+    InvoiceFilterOptionsDto,
     ReplaceInvoiceDto,
 } from 'src/modules/invoices/dtos/invoice-request.dtos';
 import {
-    CreateOneInvoiceResponseDto,
     FindManyInvoiceResponseDto,
     FindOneInvoiceResponseDto,
 } from 'src/modules/invoices/dtos/invoice-response.dtos';
@@ -40,7 +40,7 @@ import { ErrorDto } from 'src/common/dtos/error.dto';
 import { isOrderType } from 'src/common/constants/invoice.constants';
 import { PageOptionsDto } from 'src/common/dtos/page-options.dto';
 import { ApiPaginatedResponse } from 'src/common/decorators/api-paginated-response.decorator';
-import { Order } from 'src/common/constants/page.constants';
+import { BaseInvoiceDto } from './dtos/base-invoice.dto';
 
 class InvoicePipeTransform implements PipeTransform {
     transform(value: CreateInvoiceDto | ReplaceInvoiceDto) {
@@ -94,19 +94,17 @@ export class InvoicesController {
     @ApiPaginatedResponse(FindManyInvoiceResponseDto)
     findAll(
         @Query() pageOptionsDto: PageOptionsDto,
+        @Query() filterOptionsDto: InvoiceFilterOptionsDto,
         @User('id') userId: number,
     ) {
-        return this.invoicesService.findMany(pageOptionsDto, {
-            where: { user: { id: userId } },
-            relations: { order: true },
-            select: {
-                order: { id: true },
-            },
-            loadRelationIds: {
-                relations: ['partner'],
-                disableMixedMap: true,
-            },
-        });
+        const where = { user: { id: userId } };
+        if (filterOptionsDto.partnerId) {
+            where['partner'] = { id: filterOptionsDto.partnerId };
+        }
+        if (filterOptionsDto.type !== undefined) {
+            where['type'] = filterOptionsDto.type;
+        }
+        return this.invoicesService.findMany(where, pageOptionsDto);
     }
 
     @Get(':id')
@@ -125,30 +123,7 @@ export class InvoicesController {
         @Param('id', new ParseIntPipe()) id: number,
         @User('id') userId: number,
     ) {
-        return this.invoicesService.findOne({
-            where: { id, user: { id: userId } },
-            relations: {
-                partner: true,
-                invoiceItems: { product: true, orderItem: true },
-                order: { invoiceItems: { product: true } },
-                refund: { invoiceItems: { product: true } },
-            },
-            select: {
-                invoiceItems: {
-                    id: true,
-                    price: true,
-                    quantity: true,
-                    originalAmount: true,
-                    discount: true,
-                    amount: true,
-                    remark: true,
-                    weight: true,
-                    delivered: true,
-                    orderItem: { id: true },
-                },
-            },
-            order: { invoiceItems: { id: Order.ASC } },
-        });
+        return this.invoicesService.findOne({ id, user: { id: userId } });
     }
 
     @Post()
@@ -157,7 +132,7 @@ export class InvoicesController {
     @ApiCommonResponses()
     @ApiCreatedResponse({
         description: 'Returns the created invoice.',
-        type: CreateOneInvoiceResponseDto,
+        type: BaseInvoiceDto,
     })
     @ApiConflictResponse({
         description: 'Invoice already exists.',
@@ -171,10 +146,7 @@ export class InvoicesController {
         @Body(new InvoicePipeTransform()) dto: CreateInvoiceDto,
         @User('id') userId: number,
     ) {
-        return this.invoicesService.createOne({
-            ...dto,
-            user: { id: userId },
-        });
+        return this.invoicesService.createOne({ ...dto, user: { id: userId } });
     }
 
     @Put(':id')
@@ -183,7 +155,7 @@ export class InvoicesController {
     @ApiCommonResponses()
     @ApiOkResponse({
         description: 'Returns the replaced invoice.',
-        type: CreateOneInvoiceResponseDto,
+        type: BaseInvoiceDto,
     })
     @ApiConflictResponse({
         description: 'Invoice already exists.',
@@ -199,7 +171,7 @@ export class InvoicesController {
         @User('id') userId: number,
     ) {
         return this.invoicesService.replaceOne(
-            { where: { id, user: { id: userId } } },
+            { id, user: { id: userId } },
             { ...dto, user: { id: userId } },
         );
     }

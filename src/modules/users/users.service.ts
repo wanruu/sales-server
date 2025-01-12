@@ -12,13 +12,10 @@ import {
     UpdateUserDto,
 } from 'src/modules/users/dtos/user-request.dtos';
 import { InjectRepository } from '@nestjs/typeorm';
-import {
-    type FindOneOptions,
-    type FindOptionsWhere,
-    Repository,
-} from 'typeorm';
+import { type FindOptionsWhere, Repository } from 'typeorm';
 import {
     CreateOneUserResponseDto,
+    FindOneUserResponseDto,
     LoginResponseDto,
     UpdateOneUserResponseDto,
 } from 'src/modules/users/dtos/user-response.dtos';
@@ -32,21 +29,25 @@ export class UsersService {
         private jwtService: JwtService,
     ) {}
 
-    async findOne(options: FindOneOptions<User>): Promise<User> {
-        const user = await this.userRepository.findOne(options);
+    async findOne(
+        where: FindOptionsWhere<User>,
+    ): Promise<FindOneUserResponseDto> {
+        const user = await this.userRepository.findOneBy(where);
         if (!user) {
             throw new NotFoundException('User not found.');
         }
-        return plainToInstance(User, user);
+        return plainToInstance(FindOneUserResponseDto, user, {
+            excludeExtraneousValues: true,
+        });
     }
 
     async createOne(dto: CreateUserDto): Promise<CreateOneUserResponseDto> {
-        const user = this.userRepository.create({
-            ...dto,
-            password: hashSync(dto.password, genSaltSync(10)),
-        });
+        const password = hashSync(dto.password, genSaltSync(10));
+        const user = this.userRepository.create({ ...dto, password });
         const savedUser = await this.userRepository.save(user);
-        return plainToInstance(User, savedUser);
+        return plainToInstance(CreateOneUserResponseDto, savedUser, {
+            excludeExtraneousValues: true,
+        });
     }
 
     async login(dto: LoginDto): Promise<LoginResponseDto> {
@@ -61,26 +62,28 @@ export class UsersService {
     }
 
     async updateOne(
-        options: FindOneOptions<User>,
+        where: FindOptionsWhere<User>,
         dto: UpdateUserDto,
     ): Promise<UpdateOneUserResponseDto> {
-        const oldUser = await this.userRepository.findOne(options);
-        if (!oldUser) {
-            throw new NotFoundException('User not found.');
-        }
+        const oldUser = await this.userRepository.findOneBy(where);
+        if (!oldUser) throw new NotFoundException('User not found.');
 
         if (dto.password) {
             dto.password = hashSync(dto.password, genSaltSync(10));
         }
-        const savedUser = await this.userRepository.save({
-            ...oldUser,
-            ...dto,
+        const newUser = { ...oldUser };
+        Object.entries(dto).forEach(([key, value]) => {
+            if (value !== undefined) newUser[key] = value;
         });
-        return plainToInstance(User, savedUser);
+
+        const savedUser = await this.userRepository.save(newUser);
+        return plainToInstance(UpdateOneUserResponseDto, savedUser, {
+            excludeExtraneousValues: true,
+        });
     }
 
-    async deleteMany(criteria: FindOptionsWhere<User>): Promise<void> {
-        const deleteResult = await this.userRepository.delete(criteria);
+    async deleteMany(where: FindOptionsWhere<User>): Promise<void> {
+        const deleteResult = await this.userRepository.delete(where);
         if (deleteResult.affected === 0) {
             throw new NotFoundException('User not found.');
         }

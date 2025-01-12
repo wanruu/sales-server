@@ -53,10 +53,7 @@ export class UsersController {
         description: 'Returns the user with the given id.',
         type: FindOneUserResponseDto,
     })
-    @ApiNotFoundResponse({
-        description: 'User not found.',
-        type: ErrorDto,
-    })
+    @ApiNotFoundResponse({ description: 'User not found.', type: ErrorDto })
     findById(
         @Param('id', new ParseIntPipe()) id: number,
         @User('id') userId: number,
@@ -64,7 +61,7 @@ export class UsersController {
         if (userId !== id) {
             throw new UnauthorizedException('Permission denied.');
         }
-        return this.usersService.findOne({ where: { id } });
+        return this.usersService.findOne({ id });
     }
 
     @Post('login')
@@ -124,7 +121,7 @@ export class UsersController {
         if (userId !== id) {
             throw new UnauthorizedException('Permission denied.');
         }
-        return this.usersService.updateOne({ where: { id } }, dto);
+        return this.usersService.updateOne({ id }, dto);
     }
 
     @Delete(':id')

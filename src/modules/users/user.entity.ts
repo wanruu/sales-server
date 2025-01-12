@@ -5,8 +5,6 @@ import { Invoice } from 'src/modules/invoices/invoice.entity';
 import { BaseEntity } from 'src/common/entities/base.entity';
 import { InvoiceItem } from 'src/modules/invoice-items/invoice-item.entity';
 import { Constraint } from 'src/common/constants/constraint.constants';
-import { Exclude } from 'class-transformer';
-
 @Entity()
 @Unique(Constraint.UniqueUser, ['name'])
 export class User extends BaseEntity {
@@ -14,7 +12,6 @@ export class User extends BaseEntity {
     name: string;
 
     @Column({ type: 'text' })
-    @Exclude()
     password: string;
 
     @OneToMany(() => Partner, (partner) => partner.user)

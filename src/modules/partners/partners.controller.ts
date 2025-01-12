@@ -49,9 +49,10 @@ export class PartnersController {
         @Query() pageOptionsDto: PageOptionsDto,
         @User('id') userId: number,
     ) {
-        return this.partnersService.findMany(pageOptionsDto, {
-            where: { user: { id: userId } },
-        });
+        return this.partnersService.findMany(
+            { user: { id: userId } },
+            pageOptionsDto,
+        );
     }
 
     @Get(':id')
@@ -70,9 +71,7 @@ export class PartnersController {
         @Param('id', new ParseIntPipe()) id: number,
         @User('id') userId: number,
     ) {
-        return this.partnersService.findOne({
-            where: { id, user: { id: userId } },
-        });
+        return this.partnersService.findOne({ id, user: { id: userId } });
     }
 
     @Post()
@@ -88,10 +87,7 @@ export class PartnersController {
         type: ErrorDto,
     })
     createOne(@Body() dto: CreatePartnerDto, @User('id') userId: number) {
-        return this.partnersService.createOne({
-            ...dto,
-            user: { id: userId },
-        });
+        return this.partnersService.createOne({ ...dto, user: { id: userId } });
     }
 
     @Patch(':id')
@@ -116,7 +112,7 @@ export class PartnersController {
         @User('id') userId: number,
     ) {
         return this.partnersService.updateOne(
-            { where: { id, user: { id: userId } } },
+            { id, user: { id: userId } },
             dto,
         );
     }

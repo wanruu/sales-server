@@ -1,6 +1,5 @@
 import { Constraint } from 'src/common/constants/constraint.constants';
 import { BaseEntity } from 'src/common/entities/base.entity';
-import { DecimalColumnTransformer } from 'src/common/transformers/decimal-column.transformer';
 import { InvoiceItem } from 'src/modules/invoice-items/invoice-item.entity';
 import { User } from 'src/modules/users/user.entity';
 import {
@@ -27,11 +26,8 @@ export class Product extends BaseEntity {
     @Column('varchar', { length: 10 })
     unit: string;
 
-    @Column('decimal', {
-        default: 0,
-        transformer: new DecimalColumnTransformer(),
-    })
-    quantity: number;
+    @Column('decimal', { default: '0' })
+    quantity: string;
 
     @ManyToOne(() => User, (user) => user.products, {
         onDelete: 'CASCADE',

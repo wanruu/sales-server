@@ -5,6 +5,7 @@ import {
     ApiProperty,
     getSchemaPath,
     ApiPropertyOptional,
+    OmitType,
 } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
 import {
@@ -14,12 +15,14 @@ import {
     IsInt,
     IsArray,
     IsDateString,
+    IsEnum,
 } from 'class-validator';
 import { IdDto } from 'src/common/dtos/id.dto';
 import { BaseInvoiceItemDto } from 'src/modules/invoice-items/dtos/base-invoice-item.dto';
 import { CreatePartnerDto } from 'src/modules/partners/dtos/partner-request.dtos';
 import { CreateProductDto } from 'src/modules/products/dtos/product-request.dtos';
 import { BaseInvoiceDto } from './base-invoice.dto';
+import { InvoiceType } from 'src/common/constants/invoice.constants';
 
 class CreateInvoice__InvoiceItemDto extends IntersectionType(
     PickType(BaseInvoiceItemDto, [
@@ -55,7 +58,7 @@ class CreateInvoice__InvoiceItemDto extends IntersectionType(
     })
     @IsObject()
     @ValidateNested()
-    @Type((options) => (options?.object.product?.id ? IdDto : CreateProductDto))
+    @Type(({ object }) => (object.product?.id ? IdDto : CreateProductDto))
     product: IdDto | CreateProductDto;
 
     @ApiPropertyOptional({
@@ -66,11 +69,7 @@ class CreateInvoice__InvoiceItemDto extends IntersectionType(
     @IsObject()
     @ValidateNested()
     @Type(() => IdDto)
-    @Transform(
-        (params) =>
-            params.value === null ? { id: params.value } : params.value,
-        { toPlainOnly: true },
-    )
+    @Transform(({ value }) => value || { id: null }, { toPlainOnly: true })
     orderItem?: { id: number | null };
 }
 
@@ -97,7 +96,7 @@ export class CreateInvoiceDto extends PickType(BaseInvoiceDto, [
     })
     @IsObject()
     @ValidateNested()
-    @Type((options) => (options?.object.partner?.id ? IdDto : CreatePartnerDto))
+    @Type(({ object }) => (object.partner?.id ? IdDto : CreatePartnerDto))
     partner: IdDto | CreatePartnerDto;
 
     @ApiProperty({ type: Date })
@@ -118,54 +117,31 @@ export class CreateInvoiceDto extends PickType(BaseInvoiceDto, [
     @IsObject()
     @ValidateNested()
     @Type(() => IdDto)
-    @Transform(
-        (params) =>
-            params.value === null ? { id: params.value } : params.value,
-        { toPlainOnly: true },
-    )
+    @Transform(({ value }) => value || { id: null }, { toPlainOnly: true })
     order?: { id: number | null };
 }
 
-export class ReplaceInvoiceDto extends PickType(BaseInvoiceDto, [
-    'type',
-    'amount',
-    'prepayment',
-    'payment',
-    'delivered',
+export class ReplaceInvoiceDto extends OmitType(CreateInvoiceDto, [
+    'date',
+    'invoiceItems',
 ] as const) {
-    @ApiProperty({
-        oneOf: [
-            { $ref: getSchemaPath(IdDto) },
-            { $ref: getSchemaPath(CreatePartnerDto) },
-        ],
-        examples: [{ id: 1 }, { name: 'partner#1' }],
-    })
-    @IsObject()
-    @ValidateNested()
-    @Type((options) => (options?.object.partner.id ? IdDto : CreatePartnerDto))
-    partner: IdDto | CreatePartnerDto;
-
-    @ApiProperty({
-        isArray: true,
-        type: ReplaceInvoice__InvoiceItemDto,
-    })
+    @ApiProperty({ isArray: true, type: ReplaceInvoice__InvoiceItemDto })
     @IsArray()
     @ValidateNested({ each: true })
     @Type(() => ReplaceInvoice__InvoiceItemDto)
     invoiceItems: ReplaceInvoice__InvoiceItemDto[];
+}
 
-    @ApiPropertyOptional({
-        examples: [{ id: 1 }, null],
-        oneOf: [{ $ref: getSchemaPath(IdDto) }, { type: 'null' }],
-    })
+export class InvoiceFilterOptionsDto {
+    @ApiPropertyOptional()
     @IsOptional()
-    @IsObject()
-    @ValidateNested()
-    @Type(() => IdDto)
-    @Transform(
-        (params) =>
-            params.value === null ? { id: params.value } : params.value,
-        { toPlainOnly: true },
-    )
-    order?: { id: number | null };
+    @IsInt()
+    @Transform(({ value }) => parseInt(value), { toClassOnly: true })
+    partnerId?: number;
+
+    @ApiPropertyOptional({ enum: InvoiceType })
+    @IsOptional()
+    @IsEnum(InvoiceType)
+    @Transform(({ value }) => parseInt(value), { toClassOnly: true })
+    type?: InvoiceType;
 }

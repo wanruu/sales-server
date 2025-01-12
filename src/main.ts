@@ -8,13 +8,7 @@ async function bootstrap() {
     const app = await NestFactory.create(AppModule);
 
     // class-validator
-    app.useGlobalPipes(
-        new ValidationPipe({
-            forbidUnknownValues: true,
-            whitelist: true,
-            transform: true,
-        }),
-    );
+    app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
 
     // swagger
     const options = new DocumentBuilder()
