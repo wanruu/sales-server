@@ -32,7 +32,7 @@ class CreateInvoice__InvoiceItemDto extends IntersectionType(
         'discount',
         'amount',
         'remark',
-        'delivered',
+        'deliveryStatus',
     ] as const),
     PartialType(PickType(BaseInvoiceItemDto, ['weight'] as const)),
 ) {
@@ -85,7 +85,7 @@ export class CreateInvoiceDto extends PickType(BaseInvoiceDto, [
     'amount',
     'prepayment',
     'payment',
-    'delivered',
+    'deliveryStatus',
 ] as const) {
     @ApiProperty({
         oneOf: [

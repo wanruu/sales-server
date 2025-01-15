@@ -18,7 +18,8 @@ export function isRefundType(type: InvoiceType): boolean {
 }
 
 export enum DeliveryStatus {
-    NotDelivered,
-    Delivered,
-    PartiallyDelivered,
+    Processing,
+    Ready,
+    InTransit,
+    Completed,
 }

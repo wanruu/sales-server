@@ -4,6 +4,7 @@ import { Invoice } from 'src/modules/invoices/invoice.entity';
 import { BaseEntity } from 'src/common/entities/base.entity';
 import { User } from 'src/modules/users/user.entity';
 import { Constraint } from 'src/common/constants/constraint.constants';
+import { DeliveryStatus } from 'src/common/constants/invoice.constants';
 
 @Entity()
 export class InvoiceItem extends BaseEntity {
@@ -28,8 +29,11 @@ export class InvoiceItem extends BaseEntity {
     @Column('text', { default: '' })
     remark: string;
 
-    @Column('boolean', { default: false })
-    delivered: boolean;
+    @Column('enum', {
+        enum: DeliveryStatus,
+        default: DeliveryStatus.Processing,
+    })
+    deliveryStatus: DeliveryStatus;
 
     @ManyToOne(() => Product, (product) => product.invoiceItems, {
         onDelete: 'RESTRICT',

@@ -69,10 +69,10 @@ export class BaseInvoiceDto {
     @Expose()
     payment: string;
 
-    @ApiProperty({ enum: DeliveryStatus, example: DeliveryStatus.Delivered })
+    @ApiProperty({ enum: DeliveryStatus })
     @IsEnum(DeliveryStatus)
     @Expose()
-    delivered: DeliveryStatus;
+    deliveryStatus: DeliveryStatus;
 
     @ApiProperty({ type: IdDto })
     @IsObject()

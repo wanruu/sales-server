@@ -37,9 +37,9 @@ export class Invoice extends BaseEntity {
 
     @Column('enum', {
         enum: DeliveryStatus,
-        default: DeliveryStatus.NotDelivered,
+        default: DeliveryStatus.Processing,
     })
-    delivered: DeliveryStatus;
+    deliveryStatus: DeliveryStatus;
 
     @ManyToOne(() => Partner, (partner) => partner.invoices, {
         onDelete: 'CASCADE',

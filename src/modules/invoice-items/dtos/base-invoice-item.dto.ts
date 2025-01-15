@@ -1,7 +1,7 @@
 import { ApiProperty, getSchemaPath, OmitType } from '@nestjs/swagger';
 import { Expose, Transform, Type } from 'class-transformer';
 import {
-    IsBoolean,
+    IsEnum,
     IsInt,
     IsNumberString,
     IsObject,
@@ -11,6 +11,7 @@ import {
     ValidateIf,
     ValidateNested,
 } from 'class-validator';
+import { DeliveryStatus } from 'src/common/constants/invoice.constants';
 import { IdDto } from 'src/common/dtos/id.dto';
 import { BaseProductDto } from 'src/modules/products/dtos/base-product.dto';
 
@@ -78,12 +79,12 @@ export class BaseInvoiceItemDto {
     remark: string;
 
     @ApiProperty({
-        examples: [true, false],
-        description: 'Whether the invoice item is delivered.',
+        enum: DeliveryStatus,
+        description: 'Delivery status of the invoice item.',
     })
-    @IsBoolean()
+    @IsEnum(DeliveryStatus)
     @Expose()
-    delivered: boolean;
+    deliveryStatus: DeliveryStatus;
 
     @ApiProperty({ type: IdDto, example: { id: 1 } })
     @IsObject()
