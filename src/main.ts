@@ -24,6 +24,6 @@ async function bootstrap() {
     const { httpAdapter } = app.get(HttpAdapterHost);
     app.useGlobalFilters(new AllExceptionsFilter(httpAdapter));
 
-    await app.listen(process.env.PORT ?? 3000);
+    await app.listen(process.env.SERVER_PORT ?? 3000);
 }
 bootstrap();
